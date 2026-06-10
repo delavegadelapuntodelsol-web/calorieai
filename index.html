@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0E1014" />
+<title>CalorieAI</title>
+<style>html,body{margin:0;background:#0E1014;}
+#cai-key{position:fixed;left:12px;bottom:12px;z-index:999;background:#1F232C;color:#8A909C;border:1px solid #2A2F3A;border-radius:10px;padding:8px 12px;font:600 12px Inter,system-ui,sans-serif;cursor:pointer;}
+#cai-key.unset{background:#38BDF8;color:#04161F;}</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<button id="cai-key" onclick="caiSetKey()">🔑 Clé API</button>
+<script>
+window.storage = {
+  async get(k){ const v=localStorage.getItem('cai__'+k); return v==null?null:{key:k,value:v}; },
+  async set(k,v){ localStorage.setItem('cai__'+k,String(v)); return {key:k,value:v}; },
+  async delete(k){ localStorage.removeItem('cai__'+k); return {key:k,deleted:true}; },
+  async list(p=''){ const keys=[]; for(let i=0;i<localStorage.length;i++){ const kk=localStorage.key(i); if(kk&&kk.indexOf('cai__')===0){ const b=kk.slice(5); if(b.indexOf(p)===0) keys.push(b); } } return {keys,prefix:p}; }
+};</script>
+<script>
+function caiSetKey(){
+  var cur = localStorage.getItem('cai_apikey')||'';
+  var k = prompt('Colle ta clé API Anthropic (commence par sk-ant-...).\n\nElle reste UNIQUEMENT dans ce navigateur, sur cet appareil. Ne partage pas ce fichier une fois la clé saisie.', cur);
+  if(k!==null){ localStorage.setItem('cai_apikey', k.trim()); caiRefreshKeyBtn(); }
+}
+function caiRefreshKeyBtn(){
+  var b=document.getElementById('cai-key');
+  if(localStorage.getItem('cai_apikey')){ b.classList.remove('unset'); b.textContent='🔑 Clé OK'; }
+  else { b.classList.add('unset'); b.textContent='🔑 Ajouter ta clé API'; }
+}
+caiRefreshKeyBtn();
+</script>
+<script>const {useState,useEffect,useRef,useCallback}=React;
+"use strict";
+// ---------------------------------------------------------------------------
+// CalorieAI — suivi calorique par photo + historique + déficit net (montre)
+// ---------------------------------------------------------------------------
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.cai-root {
+  --bg:#0E1014; --panel:#181B22; --panel-2:#1F232C; --hair:#2A2F3A;
+  --txt:#E8EAED; --muted:#8A909C; --green:#34D399; --amber:#F0883E; --cyan:#38BDF8; --red:#F87171;
+  font-family:'Inter',system-ui,sans-serif; background:var(--bg); color:var(--txt); min-height:100vh; -webkit-font-smoothing:antialiased;
+}
+.cai-wrap { max-width:520px; margin:0 auto; padding:20px 16px 120px; }
+.cai-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; }
+.cai-logo { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; letter-spacing:-0.4px; }
+.cai-logo span { color:var(--cyan); }
+.cai-date { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+.cai-gear { background:none; border:none; color:var(--muted); cursor:pointer; padding:6px; font-size:18px; line-height:1; transition:color .15s; }
+.cai-gear:hover { color:var(--txt); }
+
+.cai-tabs { display:flex; gap:6px; background:var(--panel); border:1px solid var(--hair); border-radius:12px; padding:4px; margin-bottom:18px; }
+.cai-tab { flex:1; background:none; border:none; color:var(--muted); font-family:'Inter',sans-serif; font-weight:600; font-size:13px; padding:9px; border-radius:8px; cursor:pointer; transition:all .15s; }
+.cai-tab.active { background:var(--panel-2); color:var(--txt); }
+
+.cai-balance { background:var(--panel); border:1px solid var(--hair); border-radius:18px; padding:22px 22px 18px; position:relative; overflow:hidden; }
+.cai-balance::before { content:''; position:absolute; inset:0; background:radial-gradient(120% 80% at 50% -20%, rgba(56,189,248,0.08), transparent 60%); pointer-events:none; }
+.cai-bal-label { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+.cai-bal-num { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:58px; line-height:1; letter-spacing:-2px; margin:4px 0 2px; font-variant-numeric:tabular-nums; }
+.cai-bal-unit { font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--muted); margin-left:4px; }
+.cai-bal-state { display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:600; margin-top:4px; }
+.cai-dot { width:8px; height:8px; border-radius:50%; }
+.cai-budget-line { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-top:10px; }
+.cai-gauge { margin-top:12px; height:10px; border-radius:6px; background:var(--panel-2); overflow:hidden; }
+.cai-gauge-fill { height:100%; border-radius:6px; transition:width .5s cubic-bezier(.4,0,.2,1), background .3s; }
+.cai-gauge-meta { display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-top:8px; }
+
+.cai-watch { display:flex; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--hair); border-radius:14px; padding:12px 14px; margin-top:12px; }
+.cai-watch-ic { font-size:20px; }
+.cai-watch-body { flex:1; }
+.cai-watch-lab { font-size:13px; font-weight:600; }
+.cai-watch-hint { font-size:11px; color:var(--muted); margin-top:1px; }
+.cai-watch-input { width:84px; background:var(--panel-2); border:1px solid var(--hair); border-radius:9px; padding:9px; color:var(--txt); font-family:'JetBrains Mono',monospace; font-size:15px; text-align:right; }
+.cai-watch-input:focus { outline:none; border-color:var(--cyan); }
+
+.cai-macros { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
+.cai-macro { background:var(--panel); border:1px solid var(--hair); border-radius:12px; padding:12px; }
+.cai-macro-val { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:20px; font-variant-numeric:tabular-nums; }
+.cai-macro-lab { font-size:11px; color:var(--muted); margin-top:2px; letter-spacing:.3px; }
+
+.cai-actions { display:flex; gap:10px; margin:18px 0 8px; }
+.cai-btn { flex:1; border:none; border-radius:14px; padding:15px; font-family:'Inter',sans-serif; font-weight:600; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:transform .1s, filter .15s; }
+.cai-btn:active { transform:scale(.98); }
+.cai-btn-primary { background:var(--cyan); color:#04161F; }
+.cai-btn-primary:hover { filter:brightness(1.08); }
+.cai-btn-ghost { background:var(--panel); color:var(--txt); border:1px solid var(--hair); }
+.cai-btn-ghost:hover { background:var(--panel-2); }
+.cai-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+.cai-sec { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:22px 2px 10px; }
+.cai-entry { background:var(--panel); border:1px solid var(--hair); border-radius:14px; padding:14px; margin-bottom:10px; display:flex; gap:12px; align-items:flex-start; }
+.cai-thumb { width:52px; height:52px; border-radius:10px; object-fit:cover; flex-shrink:0; background:var(--panel-2); }
+.cai-thumb-ph { display:flex; align-items:center; justify-content:center; font-size:22px; }
+.cai-entry-body { flex:1; min-width:0; }
+.cai-entry-name { font-weight:600; font-size:15px; }
+.cai-entry-q { font-size:12px; color:var(--muted); margin-top:1px; }
+.cai-entry-macros { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-top:6px; }
+.cai-entry-kcal { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.cai-entry-del { background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; padding:2px 4px; line-height:1; }
+.cai-entry-del:hover { color:var(--red); }
+.cai-conf { display:inline-block; font-size:10px; font-family:'JetBrains Mono',monospace; padding:1px 6px; border-radius:5px; margin-left:6px; vertical-align:middle; }
+.cai-empty { text-align:center; color:var(--muted); padding:30px 20px; font-size:14px; line-height:1.5; }
+
+.cai-preview { background:var(--panel); border:1px solid var(--hair); border-radius:14px; padding:14px; margin-bottom:10px; }
+.cai-preview img { width:100%; max-height:220px; object-fit:cover; border-radius:10px; }
+.cai-analyzing { display:flex; align-items:center; gap:10px; color:var(--cyan); font-size:13px; font-weight:600; margin-top:12px; }
+.cai-spin { width:16px; height:16px; border:2px solid var(--hair); border-top-color:var(--cyan); border-radius:50%; animation:cai-rot .7s linear infinite; }
+@keyframes cai-rot { to { transform:rotate(360deg); } }
+.cai-err { color:var(--red); font-size:13px; margin-top:10px; }
+
+/* History */
+.cai-chart-card { background:var(--panel); border:1px solid var(--hair); border-radius:18px; padding:18px 14px 12px; }
+.cai-chart-head { display:flex; justify-content:space-between; align-items:baseline; padding:0 4px; margin-bottom:6px; }
+.cai-chart-title { font-size:13px; font-weight:600; }
+.cai-chart-big { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:24px; font-variant-numeric:tabular-nums; }
+.cai-hrow { display:flex; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--hair); border-radius:13px; padding:12px 14px; margin-bottom:8px; }
+.cai-hrow-date { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); width:62px; flex-shrink:0; }
+.cai-hrow-bar { flex:1; height:6px; border-radius:4px; background:var(--panel-2); overflow:hidden; }
+.cai-hrow-fill { height:100%; border-radius:4px; }
+.cai-hrow-val { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px; font-variant-numeric:tabular-nums; width:74px; text-align:right; flex-shrink:0; }
+.cai-hrow-sub { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); }
+
+.cai-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); display:flex; align-items:flex-end; justify-content:center; z-index:50; }
+.cai-modal { background:var(--panel); border:1px solid var(--hair); border-radius:20px 20px 0 0; width:100%; max-width:520px; padding:22px 20px 28px; max-height:88vh; overflow-y:auto; }
+.cai-modal-title { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; margin-bottom:16px; }
+.cai-field { margin-bottom:14px; }
+.cai-field label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px; letter-spacing:.3px; }
+.cai-input, .cai-select { width:100%; background:var(--panel-2); border:1px solid var(--hair); border-radius:10px; padding:12px; color:var(--txt); font-family:'Inter',sans-serif; font-size:15px; }
+.cai-input:focus, .cai-select:focus { outline:none; border-color:var(--cyan); }
+.cai-row { display:flex; gap:10px; } .cai-row > * { flex:1; }
+.cai-calc { background:var(--panel-2); border-radius:12px; padding:14px; margin:6px 0 16px; }
+.cai-calc-res { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--green); margin-top:10px; }
+.cai-modal-btn { width:100%; background:var(--cyan); color:#04161F; border:none; border-radius:12px; padding:15px; font-weight:600; font-size:15px; cursor:pointer; margin-top:6px; }
+.cai-modal-close { width:100%; background:none; border:none; color:var(--muted); padding:12px; cursor:pointer; font-size:14px; }
+.cai-hint { font-size:12px; color:var(--muted); line-height:1.5; margin-top:4px; }
+
+/* Tips accordion */
+.cai-tip { background:var(--panel); border:1px solid var(--hair); border-radius:14px; margin-bottom:10px; overflow:hidden; }
+.cai-tip-head { width:100%; background:none; border:none; color:var(--txt); text-align:left; padding:15px 16px; cursor:pointer; display:flex; align-items:center; gap:12px; font-family:'Inter',sans-serif; }
+.cai-tip-ic { font-size:18px; flex-shrink:0; }
+.cai-tip-title { flex:1; font-weight:600; font-size:14px; }
+.cai-tip-chev { color:var(--muted); font-size:13px; transition:transform .2s; }
+.cai-tip.open .cai-tip-chev { transform:rotate(90deg); }
+.cai-tip-body { padding:0 16px 16px; font-size:13.5px; line-height:1.6; color:#C7CBD4; }
+.cai-tip-body p { margin-bottom:9px; }
+.cai-tip-body strong { color:var(--txt); font-weight:600; }
+.cai-tip-body .k { color:var(--cyan); font-family:'JetBrains Mono',monospace; font-size:12.5px; }
+.cai-tip-body ul { list-style:none; }
+.cai-tip-body li { padding-left:16px; position:relative; margin-bottom:7px; }
+.cai-tip-body li::before { content:'·'; position:absolute; left:4px; color:var(--green); font-weight:700; }
+.cai-disclaimer { font-size:11.5px; color:var(--muted); line-height:1.5; padding:14px 4px 0; text-align:center; }
+
+/* Coach card */
+.cai-coach { background:linear-gradient(150deg, #1A2230, #181B22); border:1px solid var(--hair); border-radius:16px; padding:16px; margin-top:12px; }
+.cai-coach-top { display:flex; align-items:center; gap:10px; }
+.cai-coach-ic { width:30px; height:30px; border-radius:9px; background:rgba(56,189,248,.15); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.cai-coach-title { font-weight:600; font-size:14px; flex:1; }
+.cai-coach-btn { background:var(--cyan); color:#04161F; border:none; border-radius:9px; padding:8px 14px; font-weight:600; font-size:13px; cursor:pointer; font-family:'Inter',sans-serif; }
+.cai-coach-btn:disabled { opacity:.5; cursor:not-allowed; }
+.cai-coach-text { font-size:13.5px; line-height:1.6; color:#D5D9E0; margin-top:12px; white-space:pre-wrap; }
+.cai-coach-refresh { background:none; border:none; color:var(--cyan); font-size:12px; font-weight:600; cursor:pointer; margin-top:10px; padding:0; font-family:'Inter',sans-serif; }
+.cai-pbar { height:4px; border-radius:3px; background:var(--panel-2); overflow:hidden; margin-top:7px; }
+.cai-pbar-fill { height:100%; border-radius:3px; background:var(--cyan); transition:width .4s; }
+@media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
+`;
+const pad = (n) => String(n).padStart(2, "0");
+const keyFromDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const todayKey = () => keyFromDate(new Date());
+const prettyDate = () => new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+const shortDate = (key) => {
+    const [y, m, d] = key.split("-");
+    return new Date(y, m - 1, d).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+};
+const DEFAULT_SETTINGS = { target: 2000, sex: "homme", age: 39, weight: "", height: "", activity: 1.55, goal: -400, proteinTarget: 150 };
+function fileToResizedBase64(file, maxDim = 1024, quality = 0.8) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                let { width, height } = img;
+                if (width > height && width > maxDim) {
+                    height = (height * maxDim) / width;
+                    width = maxDim;
+                }
+                else if (height > maxDim) {
+                    width = (width * maxDim) / height;
+                    height = maxDim;
+                }
+                const c = document.createElement("canvas");
+                c.width = width;
+                c.height = height;
+                c.getContext("2d").drawImage(img, 0, 0, width, height);
+                const url = c.toDataURL("image/jpeg", quality);
+                resolve({ base64: url.split(",")[1], preview: url });
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+function CalorieAI() {
+    const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+    const [entries, setEntries] = useState([]);
+    const [activeBurn, setActiveBurn] = useState(0);
+    const [loaded, setLoaded] = useState(false);
+    const [analyzing, setAnalyzing] = useState(false);
+    const [preview, setPreview] = useState(null);
+    const [error, setError] = useState("");
+    const [tab, setTab] = useState("today");
+    const [showSettings, setShowSettings] = useState(false);
+    const [showManual, setShowManual] = useState(false);
+    const [history, setHistory] = useState(null);
+    const [coach, setCoach] = useState({ text: "", loading: false, err: "" });
+    const fileRef = useRef(null);
+    const dateKey = todayKey();
+    useEffect(() => {
+        (async () => {
+            try {
+                const s = await window.storage.get("settings");
+                if (s === null || s === void 0 ? void 0 : s.value)
+                    setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(s.value) });
+            }
+            catch (_) { }
+            try {
+                const l = await window.storage.get(`log:${dateKey}`);
+                if (l === null || l === void 0 ? void 0 : l.value)
+                    setEntries(JSON.parse(l.value));
+            }
+            catch (_) { }
+            try {
+                const d = await window.storage.get(`day:${dateKey}`);
+                if (d === null || d === void 0 ? void 0 : d.value)
+                    setActiveBurn(JSON.parse(d.value).activeBurn || 0);
+            }
+            catch (_) { }
+            setLoaded(true);
+        })();
+    }, [dateKey]);
+    // Persist today's day-meta (target snapshot + watch burn) whenever it changes
+    useEffect(() => {
+        if (!loaded)
+            return;
+        (async () => { try {
+            await window.storage.set(`day:${dateKey}`, JSON.stringify({ target: settings.target, activeBurn }));
+        }
+        catch (_) { } })();
+    }, [loaded, dateKey, settings.target, activeBurn]);
+    const persistEntries = useCallback(async (next) => {
+        setEntries(next);
+        try {
+            await window.storage.set(`log:${dateKey}`, JSON.stringify(next));
+        }
+        catch (_) { }
+    }, [dateKey]);
+    const persistSettings = useCallback(async (next) => {
+        setSettings(next);
+        try {
+            await window.storage.set("settings", JSON.stringify(next));
+        }
+        catch (_) { }
+    }, []);
+    async function getCoachTip() {
+        setCoach({ text: "", loading: true, err: "" });
+        const cKcal = entries.reduce((s, e) => s + e.calories, 0);
+        const cProt = entries.reduce((s, e) => s + e.protein, 0);
+        const cCarb = entries.reduce((s, e) => s + e.carbs, 0);
+        const cFat = entries.reduce((s, e) => s + e.fat, 0);
+        const bud = settings.target + (Number(activeBurn) || 0);
+        const hour = new Date().getHours();
+        const moment = hour < 11 ? "matin" : hour < 15 ? "midi" : hour < 19 ? "après-midi" : "soir";
+        const meals = entries.map((e) => `${e.name} (${e.calories} kcal, ${e.protein}g prot)`).join("; ") || "rien pour l'instant";
+        const prompt = `Tu es un coach nutrition bienveillant et compétent, spécialisé sèche / maintien musculaire. On est en ${moment}.
+Données du jour de l'utilisateur :
+- Budget calorique : ${bud} kcal (objectif ${settings.target}${Number(activeBurn) ? ` + ${activeBurn} dépense montre` : ""})
+- Consommé : ${cKcal} kcal → reste ${bud - cKcal} kcal
+- Protéines : ${cProt} g sur un objectif de ${settings.proteinTarget} g
+- Glucides ${cCarb} g, lipides ${cFat} g
+- Repas : ${meals}
+
+Donne un conseil PERSONNALISÉ, concret et motivant, en français, basé sur ces chiffres. 3 à 4 phrases max.
+- Si les protéines sont basses, propose des aliments riches en protéines pour combler.
+- Si peu de budget restant, propose comment finir la journée intelligemment.
+- Reste sain : ne recommande jamais de sauter des repas ni de descendre dangereusement bas. Le maintien du muscle prime.
+Réponds en texte simple, pas de markdown, pas de listes à puces.`;
+        try {
+            const res = await fetch("https://api.anthropic.com/v1/messages", {
+                method: "POST", headers: { "Content-Type": "application/json", "x-api-key": (localStorage.getItem("cai_apikey") || ""), "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+                body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content: prompt }] }),
+            });
+            const data = await res.json();
+            const text = (data.content || []).map((b) => (b.type === "text" ? b.text : "")).join("").trim();
+            setCoach({ text: text || "Pas de conseil disponible, réessaie.", loading: false, err: "" });
+        }
+        catch (_a) {
+            setCoach({ text: "", loading: false, err: "Le coach n'a pas répondu. Réessaie." });
+        }
+    }
+    async function loadHistory() {
+        setHistory(null);
+        try {
+            const list = await window.storage.list("log:");
+            const dates = ((list === null || list === void 0 ? void 0 : list.keys) || []).map((k) => k.replace("log:", "")).sort();
+            const rows = [];
+            for (const dk of dates) {
+                let ents = [], meta = {};
+                try {
+                    const l = await window.storage.get(`log:${dk}`);
+                    if (l === null || l === void 0 ? void 0 : l.value)
+                        ents = JSON.parse(l.value);
+                }
+                catch (_) { }
+                try {
+                    const d = await window.storage.get(`day:${dk}`);
+                    if (d === null || d === void 0 ? void 0 : d.value)
+                        meta = JSON.parse(d.value);
+                }
+                catch (_) { }
+                if (!ents.length && !(meta.activeBurn))
+                    continue;
+                const consumed = ents.reduce((s, e) => s + (e.calories || 0), 0);
+                const target = meta.target || settings.target;
+                const burn = meta.activeBurn || 0;
+                const budget = target + burn;
+                rows.push({ date: dk, consumed, budget, burn, ecart: budget - consumed });
+            }
+            let cum = 0;
+            const withCum = rows.map((r) => { cum += r.ecart; return { ...r, cumulative: cum }; });
+            setHistory(withCum);
+        }
+        catch (_) {
+            setHistory([]);
+        }
+    }
+    useEffect(() => { if (tab === "history")
+        loadHistory(); /* eslint-disable-next-line */ }, [tab]);
+    async function handleFile(e) {
+        var _a;
+        const file = (_a = e.target.files) === null || _a === void 0 ? void 0 : _a[0];
+        if (!file)
+            return;
+        setError("");
+        let r;
+        try {
+            r = await fileToResizedBase64(file);
+        }
+        catch (_b) {
+            setError("Impossible de lire cette image. Réessaie.");
+            return;
+        }
+        setPreview(r.preview);
+        setAnalyzing(true);
+        if (fileRef.current)
+            fileRef.current.value = "";
+        const prompt = `Tu es un assistant d'estimation nutritionnelle. Analyse la nourriture et les boissons visibles sur cette image.
+Réponds UNIQUEMENT avec du JSON valide, sans markdown, sans texte autour:
+{"items":[{"name":"nom en français","quantity":"portion estimée ex '200 g' ou '33 cl'","calories":nombre,"protein":nombre,"carbs":nombre,"fat":nombre}],"confidence":"low|medium|high","note":"courte remarque en français"}
+Estime des portions réalistes. Calories en kcal, macros en grammes. Sépare chaque aliment distinct.`;
+        try {
+            const res = await fetch("https://api.anthropic.com/v1/messages", {
+                method: "POST", headers: { "Content-Type": "application/json", "x-api-key": (localStorage.getItem("cai_apikey") || ""), "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+                body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000,
+                    messages: [{ role: "user", content: [
+                                { type: "image", source: { type: "base64", media_type: "image/jpeg", data: r.base64 } },
+                                { type: "text", text: prompt }
+                            ] }] }),
+            });
+            const data = await res.json();
+            const text = (data.content || []).map((b) => (b.type === "text" ? b.text : "")).join("").trim();
+            const cleaned = text.replace(/```json|```/g, "").trim();
+            // Extrait le bloc {...} même si le modèle ajoute du texte autour
+            const jsonStr = cleaned.slice(cleaned.indexOf("{"), cleaned.lastIndexOf("}") + 1);
+            const parsed = JSON.parse(jsonStr);
+            const items = (parsed.items || []).map((it) => ({
+                name: it.name || "Aliment", quantity: it.quantity || "",
+                calories: Math.round(+it.calories || 0), protein: Math.round(+it.protein || 0),
+                carbs: Math.round(+it.carbs || 0), fat: Math.round(+it.fat || 0)
+            }));
+            const entry = { id: Date.now(), photo: r.preview, items, confidence: parsed.confidence || "medium",
+                calories: items.reduce((s, i) => s + i.calories, 0), protein: items.reduce((s, i) => s + i.protein, 0),
+                carbs: items.reduce((s, i) => s + i.carbs, 0), fat: items.reduce((s, i) => s + i.fat, 0),
+                name: items.map((i) => i.name).join(", ") || "Repas" };
+            await persistEntries([entry, ...entries]);
+            setPreview(null);
+        }
+        catch (_c) {
+            setError("L'analyse a échoué. Réessaie, ou ajoute le repas à la main.");
+        }
+        finally {
+            setAnalyzing(false);
+        }
+    }
+    const consumed = entries.reduce((s, e) => s + e.calories, 0);
+    const protein = entries.reduce((s, e) => s + e.protein, 0);
+    const carbs = entries.reduce((s, e) => s + e.carbs, 0);
+    const fat = entries.reduce((s, e) => s + e.fat, 0);
+    const budget = settings.target + (Number(activeBurn) || 0);
+    const remaining = budget - consumed;
+    const over = remaining < 0;
+    const pct = budget > 0 ? Math.min(100, (consumed / budget) * 100) : 0;
+    const gColor = over ? "var(--amber)" : pct > 90 ? "var(--cyan)" : "var(--green)";
+    const sColor = over ? "var(--amber)" : "var(--green)";
+    return (React.createElement("div", { className: "cai-root" },
+        React.createElement("style", null, CSS),
+        React.createElement("div", { className: "cai-wrap" },
+            React.createElement("div", { className: "cai-head" },
+                React.createElement("div", null,
+                    React.createElement("div", { className: "cai-logo" },
+                        "Calorie",
+                        React.createElement("span", null, "AI")),
+                    React.createElement("div", { className: "cai-date", style: { marginTop: 4 } }, prettyDate())),
+                React.createElement("button", { className: "cai-gear", onClick: () => setShowSettings(true), "aria-label": "R\u00E9glages" }, "\u2699")),
+            React.createElement("div", { className: "cai-tabs" },
+                React.createElement("button", { className: `cai-tab ${tab === "today" ? "active" : ""}`, onClick: () => setTab("today") }, "Aujourd'hui"),
+                React.createElement("button", { className: `cai-tab ${tab === "history" ? "active" : ""}`, onClick: () => setTab("history") }, "Historique"),
+                React.createElement("button", { className: `cai-tab ${tab === "tips" ? "active" : ""}`, onClick: () => setTab("tips") }, "Conseils")),
+            tab === "today" ? (React.createElement(React.Fragment, null,
+                React.createElement("div", { className: "cai-balance" },
+                    React.createElement("div", { className: "cai-bal-label" }, over ? "Dépassement" : "Reste à manger"),
+                    React.createElement("div", { className: "cai-bal-num", style: { color: sColor } },
+                        Math.abs(remaining).toLocaleString("fr-FR"),
+                        React.createElement("span", { className: "cai-bal-unit" }, "kcal")),
+                    React.createElement("div", { className: "cai-bal-state", style: { color: sColor } },
+                        React.createElement("span", { className: "cai-dot", style: { background: sColor } }),
+                        over ? `Surplus de ${Math.abs(remaining)} kcal` : "Déficit net en cours"),
+                    React.createElement("div", { className: "cai-budget-line" },
+                        "Objectif ",
+                        settings.target.toLocaleString("fr-FR"),
+                        Number(activeBurn) > 0 && ` + ${Number(activeBurn).toLocaleString("fr-FR")} montre`,
+                        " = ",
+                        budget.toLocaleString("fr-FR"),
+                        " kcal de budget"),
+                    React.createElement("div", { className: "cai-gauge" },
+                        React.createElement("div", { className: "cai-gauge-fill", style: { width: `${pct}%`, background: gColor } })),
+                    React.createElement("div", { className: "cai-gauge-meta" },
+                        React.createElement("span", null,
+                            consumed.toLocaleString("fr-FR"),
+                            " consomm\u00E9es"),
+                        React.createElement("span", null,
+                            budget.toLocaleString("fr-FR"),
+                            " budget"))),
+                React.createElement("div", { className: "cai-watch" },
+                    React.createElement("span", { className: "cai-watch-ic" }, "\u231A"),
+                    React.createElement("div", { className: "cai-watch-body" },
+                        React.createElement("div", { className: "cai-watch-lab" }, "D\u00E9pense active \u00B7 montre"),
+                        React.createElement("div", { className: "cai-watch-hint" }, "Reporte les calories actives affich\u00E9es par ta montre")),
+                    React.createElement("input", { className: "cai-watch-input", type: "number", inputMode: "numeric", value: activeBurn || "", placeholder: "0", onChange: (e) => setActiveBurn(Number(e.target.value) || 0) })),
+                React.createElement("div", { className: "cai-macros" },
+                    React.createElement("div", { className: "cai-macro" },
+                        React.createElement("div", { className: "cai-macro-val", style: { color: "var(--cyan)" } },
+                            protein,
+                            React.createElement("span", { style: { fontSize: 13, color: "var(--muted)" } },
+                                "/",
+                                settings.proteinTarget,
+                                "g")),
+                        React.createElement("div", { className: "cai-macro-lab" }, "Prot\u00E9ines"),
+                        React.createElement("div", { className: "cai-pbar" },
+                            React.createElement("div", { className: "cai-pbar-fill", style: { width: `${Math.min(100, (protein / (settings.proteinTarget || 1)) * 100)}%`, background: protein >= settings.proteinTarget ? "var(--green)" : "var(--cyan)" } }))),
+                    React.createElement("div", { className: "cai-macro" },
+                        React.createElement("div", { className: "cai-macro-val", style: { color: "var(--amber)" } },
+                            carbs,
+                            React.createElement("span", { style: { fontSize: 13 } }, "g")),
+                        React.createElement("div", { className: "cai-macro-lab" }, "Glucides")),
+                    React.createElement("div", { className: "cai-macro" },
+                        React.createElement("div", { className: "cai-macro-val", style: { color: "var(--green)" } },
+                            fat,
+                            React.createElement("span", { style: { fontSize: 13 } }, "g")),
+                        React.createElement("div", { className: "cai-macro-lab" }, "Lipides"))),
+                React.createElement("div", { className: "cai-coach" },
+                    React.createElement("div", { className: "cai-coach-top" },
+                        React.createElement("span", { className: "cai-coach-ic" }, "\uD83E\uDD16"),
+                        React.createElement("span", { className: "cai-coach-title" }, "Coach du jour"),
+                        !coach.text && React.createElement("button", { className: "cai-coach-btn", onClick: getCoachTip, disabled: coach.loading }, coach.loading ? "…" : "Demander")),
+                    coach.loading && React.createElement("div", { className: "cai-coach-text", style: { color: "var(--cyan)", display: "flex", alignItems: "center", gap: 8 } },
+                        React.createElement("span", { className: "cai-spin" }),
+                        " Analyse de ta journ\u00E9e\u2026"),
+                    coach.err && React.createElement("div", { className: "cai-coach-text", style: { color: "var(--red)" } }, coach.err),
+                    coach.text && React.createElement(React.Fragment, null,
+                        React.createElement("div", { className: "cai-coach-text" }, coach.text),
+                        React.createElement("button", { className: "cai-coach-refresh", onClick: getCoachTip }, "\u21BB Nouveau conseil"))),
+                React.createElement("div", { className: "cai-actions" },
+                    React.createElement("label", { className: "cai-btn cai-btn-primary", style: analyzing ? { opacity: 0.5, pointerEvents: "none" } : undefined },
+                        "\uD83D\uDCF7 Photographier un repas",
+                        React.createElement("input", { ref: fileRef, type: "file", accept: "image/*", onChange: handleFile, disabled: analyzing, style: { position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" } })),
+                    React.createElement("button", { className: "cai-btn cai-btn-ghost", onClick: () => setShowManual(true), disabled: analyzing }, "\u270E \u00C0 la main")),
+                preview && analyzing && (React.createElement("div", { className: "cai-preview" },
+                    React.createElement("img", { src: preview, alt: "repas" }),
+                    React.createElement("div", { className: "cai-analyzing" },
+                        React.createElement("span", { className: "cai-spin" }),
+                        " Analyse de l'image en cours\u2026"))),
+                error && React.createElement("div", { className: "cai-err" }, error),
+                React.createElement("div", { className: "cai-sec" }, "Journal du jour"),
+                !loaded ? React.createElement("div", { className: "cai-empty" }, "Chargement\u2026")
+                    : entries.length === 0 ? React.createElement("div", { className: "cai-empty" },
+                        "Aucun repas enregistr\u00E9 aujourd'hui.",
+                        React.createElement("br", null),
+                        "Prends une photo de ce que tu manges ou bois pour d\u00E9marrer.")
+                        : entries.map((e) => {
+                            var _a, _b;
+                            return (React.createElement("div", { className: "cai-entry", key: e.id },
+                                e.photo ? React.createElement("img", { className: "cai-thumb", src: e.photo, alt: "" }) : React.createElement("div", { className: "cai-thumb cai-thumb-ph" }, "\uD83C\uDF7D"),
+                                React.createElement("div", { className: "cai-entry-body" },
+                                    React.createElement("div", { className: "cai-entry-name" },
+                                        e.name,
+                                        e.confidence && React.createElement("span", { className: "cai-conf", style: {
+                                                background: e.confidence === "high" ? "rgba(52,211,153,.15)" : e.confidence === "low" ? "rgba(248,113,113,.15)" : "rgba(56,189,248,.15)",
+                                                color: e.confidence === "high" ? "var(--green)" : e.confidence === "low" ? "var(--red)" : "var(--cyan)"
+                                            } }, e.confidence === "high" ? "fiable" : e.confidence === "low" ? "incertain" : "estimé")),
+                                    ((_a = e.items) === null || _a === void 0 ? void 0 : _a.length) > 1 && React.createElement("div", { className: "cai-entry-q" }, e.items.map((i) => i.quantity).filter(Boolean).join(" · ")),
+                                    ((_b = e.items) === null || _b === void 0 ? void 0 : _b.length) === 1 && e.items[0].quantity && React.createElement("div", { className: "cai-entry-q" }, e.items[0].quantity),
+                                    React.createElement("div", { className: "cai-entry-macros" },
+                                        "P ",
+                                        e.protein,
+                                        "g \u00B7 G ",
+                                        e.carbs,
+                                        "g \u00B7 L ",
+                                        e.fat,
+                                        "g")),
+                                React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 } },
+                                    React.createElement("span", { className: "cai-entry-kcal" },
+                                        e.calories,
+                                        React.createElement("span", { style: { fontSize: 11, color: "var(--muted)", fontWeight: 400 } }, " kcal")),
+                                    React.createElement("button", { className: "cai-entry-del", onClick: () => persistEntries(entries.filter((x) => x.id !== e.id)), "aria-label": "Supprimer" }, "\u2715"))));
+                        }))) : tab === "history" ? (React.createElement(HistoryView, { history: history })) : (React.createElement(TipsView, null))),
+        showSettings && React.createElement(SettingsModal, { settings: settings, onSave: (s) => { persistSettings(s); setShowSettings(false); }, onClose: () => setShowSettings(false) }),
+        showManual && React.createElement(ManualModal, { onAdd: (e) => { persistEntries([e, ...entries]); setShowManual(false); }, onClose: () => setShowManual(false) })));
+}
+// --------------------------- History view ----------------------------------
+function HistoryView({ history }) {
+    if (history === null)
+        return React.createElement("div", { className: "cai-empty" }, "Chargement de l'historique\u2026");
+    if (history.length === 0)
+        return React.createElement("div", { className: "cai-empty" },
+            "Pas encore d'historique.",
+            React.createElement("br", null),
+            "Tes journ\u00E9es enregistr\u00E9es appara\u00EEtront ici jour apr\u00E8s jour.");
+    const cum = history[history.length - 1].cumulative;
+    const maxEcart = Math.max(1, ...history.map((h) => Math.abs(h.ecart)));
+    return (React.createElement(React.Fragment, null,
+        React.createElement("div", { className: "cai-chart-card" },
+            React.createElement("div", { className: "cai-chart-head" },
+                React.createElement("span", { className: "cai-chart-title" }, "D\u00E9ficit cumul\u00E9"),
+                React.createElement("span", { className: "cai-chart-big", style: { color: cum >= 0 ? "var(--green)" : "var(--amber)" } },
+                    cum >= 0 ? "−" : "+",
+                    Math.abs(cum).toLocaleString("fr-FR"),
+                    " kcal")),
+            React.createElement(CumulativeChart, { data: history }),
+            React.createElement("div", { style: { fontFamily: "JetBrains Mono, monospace", fontSize: 11, color: "var(--muted)", textAlign: "center", marginTop: 4 } },
+                "\u2248 ",
+                (Math.abs(cum) / 7700).toFixed(2),
+                " kg de masse grasse th\u00E9orique",
+                cum >= 0 ? " en moins" : " en plus")),
+        React.createElement("div", { className: "cai-sec" }, "D\u00E9tail par jour"),
+        [...history].reverse().map((h) => {
+            const good = h.ecart >= 0;
+            return (React.createElement("div", { className: "cai-hrow", key: h.date },
+                React.createElement("span", { className: "cai-hrow-date" }, shortDate(h.date)),
+                React.createElement("div", { style: { flex: 1 } },
+                    React.createElement("div", { className: "cai-hrow-bar" },
+                        React.createElement("div", { className: "cai-hrow-fill", style: { width: `${(Math.abs(h.ecart) / maxEcart) * 100}%`, background: good ? "var(--green)" : "var(--amber)" } })),
+                    React.createElement("div", { className: "cai-hrow-sub" },
+                        h.consumed,
+                        " consomm\u00E9es / ",
+                        h.budget,
+                        " budget",
+                        h.burn ? ` · ⌚ ${h.burn}` : "")),
+                React.createElement("span", { className: "cai-hrow-val", style: { color: good ? "var(--green)" : "var(--amber)" } },
+                    good ? "−" : "+",
+                    Math.abs(h.ecart))));
+        })));
+}
+function CumulativeChart({ data }) {
+    if (data.length < 2)
+        return (React.createElement("div", { style: { color: "var(--muted)", fontSize: 13, textAlign: "center", padding: "20px 0" } }, "La courbe appara\u00EEt d\u00E8s que tu as au moins 2 journ\u00E9es enregistr\u00E9es."));
+    const W = 480, H = 170, pL = 8, pR = 8, pT = 14, pB = 10;
+    const vals = data.map((d) => d.cumulative);
+    let min = Math.min(0, ...vals), max = Math.max(0, ...vals);
+    if (min === max)
+        max = min + 1;
+    const x = (i) => pL + (i / (data.length - 1)) * (W - pL - pR);
+    const y = (v) => pT + (1 - (v - min) / (max - min)) * (H - pT - pB);
+    const line = data.map((d, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(d.cumulative).toFixed(1)}`).join(" ");
+    const area = `M${x(0).toFixed(1)},${y(0).toFixed(1)} ` + data.map((d, i) => `L${x(i).toFixed(1)},${y(d.cumulative).toFixed(1)}`).join(" ") + ` L${x(data.length - 1).toFixed(1)},${y(0).toFixed(1)} Z`;
+    return (React.createElement("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", preserveAspectRatio: "none", style: { display: "block" } },
+        React.createElement("defs", null,
+            React.createElement("linearGradient", { id: "caiFill", x1: "0", y1: "0", x2: "0", y2: "1" },
+                React.createElement("stop", { offset: "0%", stopColor: "rgba(52,211,153,0.30)" }),
+                React.createElement("stop", { offset: "100%", stopColor: "rgba(52,211,153,0)" }))),
+        React.createElement("line", { x1: pL, y1: y(0), x2: W - pR, y2: y(0), stroke: "#2A2F3A", strokeWidth: "1", strokeDasharray: "3 3" }),
+        React.createElement("path", { d: area, fill: "url(#caiFill)" }),
+        React.createElement("path", { d: line, fill: "none", stroke: "#34D399", strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round" }),
+        data.map((d, i) => React.createElement("circle", { key: i, cx: x(i), cy: y(d.cumulative), r: "2.5", fill: "#34D399" }))));
+}
+// --------------------------- Tips (sèche) ----------------------------------
+const TIPS = [
+    {
+        ic: "🎯", title: "Cadrer le déficit",
+        body: (React.createElement(React.Fragment, null,
+            React.createElement("p", null,
+                "Vise une perte de ",
+                React.createElement("strong", null, "0,5 \u00E0 1 % du poids de corps par semaine"),
+                ". Plus agressif, c'est du muscle qui part avec la graisse, plus de fatigue et plus de fringales."),
+            React.createElement("ul", null,
+                React.createElement("li", null,
+                    "Un d\u00E9ficit mod\u00E9r\u00E9 de ",
+                    React.createElement("span", { className: "k" }, "300\u2013500 kcal/jour"),
+                    " est le meilleur compromis pour garder le muscle."),
+                React.createElement("li", null,
+                    "Juge sur des ",
+                    React.createElement("strong", null, "moyennes hebdomadaires"),
+                    " de poids, pas au jour le jour : l'eau et le glycog\u00E8ne font yo-yo la balance."),
+                React.createElement("li", null, "Trop long, trop bas ? Place une semaine au maintien (\u00AB diet break \u00BB) pour relancer la machine et la t\u00EAte.")))),
+    },
+    {
+        ic: "🥩", title: "Protéines : le pilier anti-fonte",
+        body: (React.createElement(React.Fragment, null,
+            React.createElement("p", null,
+                "C'est ",
+                React.createElement("strong", null, "le levier n\u00B01"),
+                " pour pr\u00E9server la masse musculaire en d\u00E9ficit. En s\u00E8che, monte plus haut qu'\u00E0 l'entretien."),
+            React.createElement("ul", null,
+                React.createElement("li", null,
+                    "Cible ",
+                    React.createElement("span", { className: "k" }, "1,8 \u00E0 2,4 g/kg"),
+                    " de poids de corps par jour."),
+                React.createElement("li", null,
+                    "R\u00E9partis sur ",
+                    React.createElement("strong", null, "3 \u00E0 4 prises"),
+                    " de 30\u201340 g pour stimuler la synth\u00E8se r\u00E9guli\u00E8rement."),
+                React.createElement("li", null, "Sources denses et rassasiantes : viandes maigres, poisson, \u0153ufs, skyr / fromage blanc, l\u00E9gumineuses, whey.")))),
+    },
+    {
+        ic: "🏋️", title: "Garder le muscle = continuer à le solliciter",
+        body: (React.createElement(React.Fragment, null,
+            React.createElement("p", null,
+                "Le corps conserve le muscle qu'il ",
+                React.createElement("strong", null, "utilise"),
+                ". La muscu lourde est le signal qui dit \u00AB garde \u00E7a \u00BB."),
+            React.createElement("ul", null,
+                React.createElement("li", null,
+                    "Maintiens l'",
+                    React.createElement("strong", null, "intensit\u00E9 et les charges"),
+                    ", quitte \u00E0 r\u00E9duire un peu le volume si la r\u00E9cup baisse."),
+                React.createElement("li", null, "Le cardio aide \u00E0 creuser le d\u00E9ficit mais ne remplace pas la muscu pour le signal de maintien."),
+                React.createElement("li", null, "\u00C9vite le \u00AB tout cardio \u00BB : en sous-alimentation, un exc\u00E8s peut cannibaliser le muscle.")))),
+    },
+    {
+        ic: "🍚", title: "Glucides, lipides, fibres",
+        body: (React.createElement(React.Fragment, null,
+            React.createElement("ul", null,
+                React.createElement("li", null,
+                    React.createElement("strong", null, "Glucides"),
+                    " : concentre-les autour de l'entra\u00EEnement pour tenir la performance."),
+                React.createElement("li", null,
+                    React.createElement("strong", null, "Lipides"),
+                    " : ne descends pas sous ",
+                    React.createElement("span", { className: "k" }, "~0,6\u20130,8 g/kg"),
+                    ", ils soutiennent les hormones."),
+                React.createElement("li", null,
+                    React.createElement("strong", null, "Fibres"),
+                    " : ",
+                    React.createElement("span", { className: "k" }, "25\u201335 g/jour"),
+                    " (l\u00E9gumes, complets) pour la sati\u00E9t\u00E9 et le transit."),
+                React.createElement("li", null,
+                    React.createElement("strong", null, "Hydratation"),
+                    " : la faim se d\u00E9guise souvent en soif en d\u00E9ficit.")))),
+    },
+    {
+        ic: "💊", title: "Compléments (l'alimentation d'abord)",
+        body: (React.createElement(React.Fragment, null,
+            React.createElement("p", null,
+                "Les compl\u00E9ments ",
+                React.createElement("strong", null, "compl\u00E8tent"),
+                ", ils ne remplacent pas une base solide. Les seuls vraiment utiles :"),
+            React.createElement("ul", null,
+                React.createElement("li", null,
+                    React.createElement("strong", null, "Cr\u00E9atine monohydrate"),
+                    " : ",
+                    React.createElement("span", { className: "k" }, "3\u20135 g/jour"),
+                    ", tous les jours, \u00E0 n'importe quelle heure. Le compl\u00E9ment le plus prouv\u00E9 pour la force et le maintien musculaire. Elle retient un peu d'eau dans le muscle (normal, ce n'est pas de la graisse) \u2014 utile justement en s\u00E8che. S\u00FBre sur le long terme chez un sujet sain."),
+                React.createElement("li", null,
+                    React.createElement("strong", null, "Prot\u00E9ine en poudre"),
+                    " (whey / iso) : pratique pour atteindre ton quota, rien de magique."),
+                React.createElement("li", null,
+                    React.createElement("strong", null, "Caf\u00E9ine"),
+                    " : coup de boost \u00E0 l'entra\u00EEnement + l\u00E9ger coupe-faim."),
+                React.createElement("li", null,
+                    React.createElement("strong", null, "Vitamine D / Om\u00E9ga-3"),
+                    " : pertinents surtout si carence ou alimentation pauvre en poisson."),
+                React.createElement("li", null,
+                    React.createElement("strong", null, "\u00C9lectrolytes / un peu de sel"),
+                    " : utiles si tu transpires beaucoup et manges peu transform\u00E9."),
+                React.createElement("li", null,
+                    React.createElement("strong", null, "Br\u00FBleurs de graisse"),
+                    " : effet marginal, beaucoup de marketing \u2014 prudence.")))),
+    },
+    {
+        ic: "😴", title: "Sommeil & récupération",
+        body: (React.createElement(React.Fragment, null,
+            React.createElement("p", null,
+                "Sous-estim\u00E9 et pourtant d\u00E9cisif : vise ",
+                React.createElement("span", { className: "k" }, "7 \u00E0 9 h"),
+                " par nuit."),
+            React.createElement("ul", null,
+                React.createElement("li", null, "Le manque de sommeil augmente la perte de muscle et la faim (ghr\u00E9line), et freine la r\u00E9cup."),
+                React.createElement("li", null, "Une bonne nuit rend le d\u00E9ficit beaucoup plus facile \u00E0 tenir mentalement.")))),
+    },
+    {
+        ic: "⚠️", title: "Les pièges classiques de la sèche",
+        body: (React.createElement(React.Fragment, null,
+            React.createElement("ul", null,
+                React.createElement("li", null, "D\u00E9ficit trop violent \u2192 fonte musculaire, m\u00E9tabolisme en berne, craquages."),
+                React.createElement("li", null, "Prot\u00E9ines trop basses ou muscu abandonn\u00E9e \u2192 c'est le muscle qui paie."),
+                React.createElement("li", null, "Cardio \u00E0 outrance + sous-alimentation \u2192 fatigue et perte de force."),
+                React.createElement("li", null, "Relation obsessionnelle \u00E0 la balance \u2192 fie-toi aux tendances et au miroir, pas au chiffre du matin.")))),
+    },
+];
+function TipsView() {
+    const [open, setOpen] = useState(0);
+    return (React.createElement(React.Fragment, null,
+        React.createElement("div", { className: "cai-sec", style: { marginTop: 4 } }, "Perte de poids \u00B7 maintien musculaire"),
+        TIPS.map((t, i) => (React.createElement("div", { className: `cai-tip ${open === i ? "open" : ""}`, key: i },
+            React.createElement("button", { className: "cai-tip-head", onClick: () => setOpen(open === i ? -1 : i) },
+                React.createElement("span", { className: "cai-tip-ic" }, t.ic),
+                React.createElement("span", { className: "cai-tip-title" }, t.title),
+                React.createElement("span", { className: "cai-tip-chev" }, "\u25B6")),
+            open === i && React.createElement("div", { className: "cai-tip-body" }, t.body)))),
+        React.createElement("div", { className: "cai-disclaimer" }, "Rep\u00E8res g\u00E9n\u00E9raux de nutrition et d'entra\u00EEnement, pas un avis m\u00E9dical. Pour un compl\u00E9ment combin\u00E9 \u00E0 un traitement ou une condition de sant\u00E9, demande conseil \u00E0 un m\u00E9decin ou un pharmacien.")));
+}
+// --------------------------- Settings modal --------------------------------
+function SettingsModal({ settings, onSave, onClose }) {
+    const [s, setS] = useState(settings);
+    const num = (v) => (v === "" ? "" : Number(v));
+    let maintenance = null;
+    if (s.weight && s.height && s.age) {
+        const base = 10 * +s.weight + 6.25 * +s.height - 5 * +s.age + (s.sex === "homme" ? 5 : -161);
+        maintenance = Math.round(base * +s.activity);
+    }
+    const computed = maintenance ? maintenance + +s.goal : null;
+    return (React.createElement("div", { className: "cai-overlay", onClick: onClose },
+        React.createElement("div", { className: "cai-modal", onClick: (e) => e.stopPropagation() },
+            React.createElement("div", { className: "cai-modal-title" }, "R\u00E9glages"),
+            React.createElement("div", { className: "cai-field" },
+                React.createElement("label", null, "Objectif calorique quotidien (kcal)"),
+                React.createElement("input", { className: "cai-input", type: "number", inputMode: "numeric", value: s.target, onChange: (e) => setS({ ...s, target: num(e.target.value) || 0 }) }),
+                React.createElement("div", { className: "cai-hint" }, "Ton seuil de base. En dessous = d\u00E9ficit, au-dessus = surplus. La d\u00E9pense de ta montre s'ajoute par-dessus chaque jour.")),
+            React.createElement("div", { className: "cai-field" },
+                React.createElement("label", null, "Objectif prot\u00E9ines quotidien (g)"),
+                React.createElement("input", { className: "cai-input", type: "number", inputMode: "numeric", value: s.proteinTarget, onChange: (e) => setS({ ...s, proteinTarget: num(e.target.value) || 0 }) }),
+                s.weight ? (React.createElement("div", { style: { display: "flex", gap: 6, marginTop: 8 } }, [1.8, 2.0, 2.2, 2.4].map((f) => (React.createElement("button", { key: f, onClick: () => setS({ ...s, proteinTarget: Math.round(+s.weight * f) }), style: { flex: 1, background: "var(--panel-2)", border: "1px solid var(--hair)", borderRadius: 9, padding: "9px 4px", color: "var(--txt)", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "JetBrains Mono, monospace" } },
+                    f,
+                    " g/kg",
+                    React.createElement("br", null),
+                    React.createElement("span", { style: { color: "var(--cyan)" } }, Math.round(+s.weight * f))))))) : React.createElement("div", { className: "cai-hint" }, "Renseigne ton poids ci-dessous pour calculer automatiquement (\u2248 2 g/kg en s\u00E8che).")),
+            React.createElement("div", { className: "cai-calc" },
+                React.createElement("div", { style: { fontSize: 13, fontWeight: 600, marginBottom: 12 } }, "Calculateur (optionnel)"),
+                React.createElement("div", { className: "cai-row", style: { marginBottom: 12 } },
+                    React.createElement("div", null,
+                        React.createElement("label", { style: { fontSize: 12, color: "var(--muted)", display: "block", marginBottom: 6 } }, "Sexe"),
+                        React.createElement("select", { className: "cai-select", value: s.sex, onChange: (e) => setS({ ...s, sex: e.target.value }) },
+                            React.createElement("option", { value: "homme" }, "Homme"),
+                            React.createElement("option", { value: "femme" }, "Femme"))),
+                    React.createElement("div", null,
+                        React.createElement("label", { style: { fontSize: 12, color: "var(--muted)", display: "block", marginBottom: 6 } }, "\u00C2ge"),
+                        React.createElement("input", { className: "cai-input", type: "number", value: s.age, onChange: (e) => setS({ ...s, age: num(e.target.value) }) }))),
+                React.createElement("div", { className: "cai-row", style: { marginBottom: 12 } },
+                    React.createElement("div", null,
+                        React.createElement("label", { style: { fontSize: 12, color: "var(--muted)", display: "block", marginBottom: 6 } }, "Poids (kg)"),
+                        React.createElement("input", { className: "cai-input", type: "number", placeholder: "ex 80", value: s.weight, onChange: (e) => setS({ ...s, weight: num(e.target.value) }) })),
+                    React.createElement("div", null,
+                        React.createElement("label", { style: { fontSize: 12, color: "var(--muted)", display: "block", marginBottom: 6 } }, "Taille (cm)"),
+                        React.createElement("input", { className: "cai-input", type: "number", placeholder: "ex 178", value: s.height, onChange: (e) => setS({ ...s, height: num(e.target.value) }) }))),
+                React.createElement("div", { className: "cai-field", style: { marginBottom: 12 } },
+                    React.createElement("label", null, "Activit\u00E9 (hors sport track\u00E9 par la montre)"),
+                    React.createElement("select", { className: "cai-select", value: s.activity, onChange: (e) => setS({ ...s, activity: Number(e.target.value) }) },
+                        React.createElement("option", { value: 1.2 }, "S\u00E9dentaire"),
+                        React.createElement("option", { value: 1.375 }, "L\u00E9g\u00E8re"),
+                        React.createElement("option", { value: 1.55 }, "Mod\u00E9r\u00E9e"),
+                        React.createElement("option", { value: 1.725 }, "Intense"),
+                        React.createElement("option", { value: 1.9 }, "Tr\u00E8s intense"))),
+                React.createElement("div", { className: "cai-field", style: { marginBottom: 0 } },
+                    React.createElement("label", null, "Objectif"),
+                    React.createElement("select", { className: "cai-select", value: s.goal, onChange: (e) => setS({ ...s, goal: Number(e.target.value) }) },
+                        React.createElement("option", { value: -500 }, "Perte nette (-500)"),
+                        React.createElement("option", { value: -400 }, "Perte mod\u00E9r\u00E9e (-400)"),
+                        React.createElement("option", { value: -250 }, "Perte douce (-250)"),
+                        React.createElement("option", { value: 0 }, "Maintien"),
+                        React.createElement("option", { value: 300 }, "Prise de masse (+300)"))),
+                maintenance && React.createElement("div", { className: "cai-calc-res" },
+                    "Maintien \u2248 ",
+                    maintenance.toLocaleString("fr-FR"),
+                    " \u00B7 Objectif \u2248 ",
+                    computed.toLocaleString("fr-FR"),
+                    " kcal")),
+            computed && React.createElement("button", { className: "cai-modal-btn", style: { background: "var(--panel-2)", color: "var(--txt)", marginBottom: 8 }, onClick: () => setS({ ...s, target: computed }) },
+                "Appliquer l'objectif calcul\u00E9 (",
+                computed.toLocaleString("fr-FR"),
+                ")"),
+            React.createElement("button", { className: "cai-modal-btn", onClick: () => onSave(s) }, "Enregistrer"),
+            React.createElement("button", { className: "cai-modal-close", onClick: onClose }, "Annuler"))));
+}
+// --------------------------- Manual entry modal ----------------------------
+function ManualModal({ onAdd, onClose }) {
+    const [f, setF] = useState({ name: "", calories: "", protein: "", carbs: "", fat: "", quantity: "" });
+    const valid = f.name && f.calories;
+    function submit() {
+        if (!valid)
+            return;
+        const item = { name: f.name, quantity: f.quantity, calories: Math.round(+f.calories || 0), protein: Math.round(+f.protein || 0), carbs: Math.round(+f.carbs || 0), fat: Math.round(+f.fat || 0) };
+        onAdd({ id: Date.now(), photo: null, items: [item], confidence: null, ...item, name: f.name });
+    }
+    return (React.createElement("div", { className: "cai-overlay", onClick: onClose },
+        React.createElement("div", { className: "cai-modal", onClick: (e) => e.stopPropagation() },
+            React.createElement("div", { className: "cai-modal-title" }, "Ajouter \u00E0 la main"),
+            React.createElement("div", { className: "cai-field" },
+                React.createElement("label", null, "Aliment / boisson"),
+                React.createElement("input", { className: "cai-input", value: f.name, placeholder: "ex Caf\u00E9 au lait", onChange: (e) => setF({ ...f, name: e.target.value }) })),
+            React.createElement("div", { className: "cai-field" },
+                React.createElement("label", null, "Quantit\u00E9 (optionnel)"),
+                React.createElement("input", { className: "cai-input", value: f.quantity, placeholder: "ex 25 cl", onChange: (e) => setF({ ...f, quantity: e.target.value }) })),
+            React.createElement("div", { className: "cai-field" },
+                React.createElement("label", null, "Calories (kcal)"),
+                React.createElement("input", { className: "cai-input", type: "number", inputMode: "numeric", value: f.calories, onChange: (e) => setF({ ...f, calories: e.target.value }) })),
+            React.createElement("div", { className: "cai-row" },
+                React.createElement("div", { className: "cai-field" },
+                    React.createElement("label", null, "Prot. (g)"),
+                    React.createElement("input", { className: "cai-input", type: "number", value: f.protein, onChange: (e) => setF({ ...f, protein: e.target.value }) })),
+                React.createElement("div", { className: "cai-field" },
+                    React.createElement("label", null, "Gluc. (g)"),
+                    React.createElement("input", { className: "cai-input", type: "number", value: f.carbs, onChange: (e) => setF({ ...f, carbs: e.target.value }) })),
+                React.createElement("div", { className: "cai-field" },
+                    React.createElement("label", null, "Lip. (g)"),
+                    React.createElement("input", { className: "cai-input", type: "number", value: f.fat, onChange: (e) => setF({ ...f, fat: e.target.value }) }))),
+            React.createElement("button", { className: "cai-modal-btn", onClick: submit, disabled: !valid, style: { opacity: valid ? 1 : 0.5 } }, "Ajouter"),
+            React.createElement("button", { className: "cai-modal-close", onClick: onClose }, "Annuler"))));
+}
+</script>
+<script>
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(CalorieAI));
+</script>
+</body>
+</html>
