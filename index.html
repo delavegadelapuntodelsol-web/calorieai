@@ -344,7 +344,8 @@ Réponds en texte simple, pas de markdown, pas de listes à puces.`;
         loadHistory(); /* eslint-disable-next-line */ }, [tab]);
     async function handleFile(e) {
         var _a;
-        const file = (_a = e.target.files) === null || _a === void 0 ? void 0 : _a[0];
+        const inputEl = e.target;
+        const file = (_a = inputEl.files) === null || _a === void 0 ? void 0 : _a[0];
         if (!file)
             return;
         setError("");
@@ -358,8 +359,8 @@ Réponds en texte simple, pas de markdown, pas de listes à puces.`;
         }
         setPreview(r.preview);
         setAnalyzing(true);
-        if (fileRef.current)
-            fileRef.current.value = "";
+        if (inputEl)
+            inputEl.value = "";
         const prompt = `Tu es un assistant d'estimation nutritionnelle. Analyse la nourriture et les boissons visibles sur cette image.
 Réponds UNIQUEMENT avec du JSON valide, sans markdown, sans texte autour:
 {"items":[{"name":"nom en français","quantity":"portion estimée ex '200 g' ou '33 cl'","calories":nombre,"protein":nombre,"carbs":nombre,"fat":nombre}],"confidence":"low|medium|high","note":"courte remarque en français"}
@@ -486,11 +487,15 @@ Estime des portions réalistes. Calories en kcal, macros en grammes. Sépare cha
                     coach.text && React.createElement(React.Fragment, null,
                         React.createElement("div", { className: "cai-coach-text" }, coach.text),
                         React.createElement("button", { className: "cai-coach-refresh", onClick: getCoachTip }, "\u21BB Nouveau conseil"))),
-                React.createElement("div", { className: "cai-actions" },
+                React.createElement("div", { className: "cai-actions", style: { flexDirection: "column" } },
                     React.createElement("label", { className: "cai-btn cai-btn-primary", style: analyzing ? { opacity: 0.5, pointerEvents: "none" } : undefined },
-                        "\uD83D\uDCF7 Photographier un repas",
-                        React.createElement("input", { ref: fileRef, type: "file", accept: "image/*", onChange: handleFile, disabled: analyzing, style: { position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" } })),
-                    React.createElement("button", { className: "cai-btn cai-btn-ghost", onClick: () => setShowManual(true), disabled: analyzing }, "\u270E \u00C0 la main")),
+                        "\uD83D\uDCF7 Prendre une photo",
+                        React.createElement("input", { ref: fileRef, type: "file", accept: "image/*", capture: "environment", onChange: handleFile, disabled: analyzing, style: { position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" } })),
+                    React.createElement("div", { style: { display: "flex", gap: 10 } },
+                        React.createElement("label", { className: "cai-btn cai-btn-ghost", style: analyzing ? { flex: 1, opacity: 0.5, pointerEvents: "none" } : { flex: 1 } },
+                            "\uD83D\uDDBC Galerie",
+                            React.createElement("input", { type: "file", accept: "image/*", onChange: handleFile, disabled: analyzing, style: { position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" } })),
+                        React.createElement("button", { className: "cai-btn cai-btn-ghost", style: { flex: 1 }, onClick: () => setShowManual(true), disabled: analyzing }, "\u270E \u00C0 la main"))),
                 preview && analyzing && (React.createElement("div", { className: "cai-preview" },
                     React.createElement("img", { src: preview, alt: "repas" }),
                     React.createElement("div", { className: "cai-analyzing" },
