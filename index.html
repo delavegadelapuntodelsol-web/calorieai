@@ -4,6 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#0E1014" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22CalorieAI%22%2C%22short_name%22%3A%22CalorieAI%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230E1014%22%2C%22theme_color%22%3A%22%230E1014%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2522http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2522%2520width%253D%2522512%2522%2520height%253D%2522512%2522%253E%253Crect%2520width%253D%2522512%2522%2520height%253D%2522512%2522%2520rx%253D%252296%2522%2520fill%253D%2522%25230E1014%2522%252F%253E%253Ccircle%2520cx%253D%2522256%2522%2520cy%253D%2522256%2522%2520r%253D%2522150%2522%2520fill%253D%2522none%2522%2520stroke%253D%2522%252338BDF8%2522%2520stroke-width%253D%252232%2522%252F%253E%253Cpath%2520d%253D%2522M256%2520256%2520L256%2520140%2522%2520stroke%253D%2522%252334D399%2522%2520stroke-width%253D%252228%2522%2520stroke-linecap%253D%2522round%2522%252F%253E%253Cpath%2520d%253D%2522M256%2520256%2520L344%2520300%2522%2520stroke%253D%2522%252334D399%2522%2520stroke-width%253D%252228%2522%2520stroke-linecap%253D%2522round%2522%252F%253E%253C%252Fsvg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22512%22%20height%3D%22512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%2296%22%20fill%3D%22%230E1014%22%2F%3E%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%22150%22%20fill%3D%22none%22%20stroke%3D%22%2338BDF8%22%20stroke-width%3D%2232%22%2F%3E%3Cpath%20d%3D%22M256%20256%20L256%20140%22%20stroke%3D%22%2334D399%22%20stroke-width%3D%2228%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M256%20256%20L344%20300%22%20stroke%3D%22%2334D399%22%20stroke-width%3D%2228%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22512%22%20height%3D%22512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%2296%22%20fill%3D%22%230E1014%22%2F%3E%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%22150%22%20fill%3D%22none%22%20stroke%3D%22%2338BDF8%22%20stroke-width%3D%2232%22%2F%3E%3Cpath%20d%3D%22M256%20256%20L256%20140%22%20stroke%3D%22%2334D399%22%20stroke-width%3D%2228%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M256%20256%20L344%20300%22%20stroke%3D%22%2334D399%22%20stroke-width%3D%2228%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E" />
 <title>CalorieAI</title>
 <style>html,body{margin:0;background:#0E1014;}
 #cai-key{position:fixed;left:12px;bottom:12px;z-index:999;background:#1F232C;color:#8A909C;border:1px solid #2A2F3A;border-radius:10px;padding:8px 12px;font:600 12px Inter,system-ui,sans-serif;cursor:pointer;}
@@ -55,8 +61,9 @@ const CSS = `
 .cai-gear { background:none; border:none; color:var(--muted); cursor:pointer; padding:6px; font-size:18px; line-height:1; transition:color .15s; }
 .cai-gear:hover { color:var(--txt); }
 
-.cai-tabs { display:flex; gap:6px; background:var(--panel); border:1px solid var(--hair); border-radius:12px; padding:4px; margin-bottom:18px; }
-.cai-tab { flex:1; background:none; border:none; color:var(--muted); font-family:'Inter',sans-serif; font-weight:600; font-size:13px; padding:9px; border-radius:8px; cursor:pointer; transition:all .15s; }
+.cai-tabs { display:flex; gap:6px; background:var(--panel); border:1px solid var(--hair); border-radius:12px; padding:4px; margin-bottom:18px; overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none; }
+.cai-tabs::-webkit-scrollbar { display:none; }
+.cai-tab { flex:0 0 auto; background:none; border:none; color:var(--muted); font-family:'Inter',sans-serif; font-weight:600; font-size:13px; padding:9px 14px; border-radius:8px; cursor:pointer; transition:all .15s; white-space:nowrap; }
 .cai-tab.active { background:var(--panel-2); color:var(--txt); }
 
 .cai-balance { background:var(--panel); border:1px solid var(--hair); border-radius:18px; padding:22px 22px 18px; position:relative; overflow:hidden; }
@@ -156,6 +163,34 @@ const CSS = `
 .cai-tip-body li::before { content:'·'; position:absolute; left:4px; color:var(--green); font-weight:700; }
 .cai-disclaimer { font-size:11.5px; color:var(--muted); line-height:1.5; padding:14px 4px 0; text-align:center; }
 
+/* Recents chips */
+.cai-recents { display:flex; gap:8px; overflow-x:auto; padding:4px 0 2px; margin-top:4px; scrollbar-width:none; }
+.cai-recents::-webkit-scrollbar { display:none; }
+.cai-chip { flex:0 0 auto; background:var(--panel); border:1px solid var(--hair); color:var(--txt); border-radius:20px; padding:8px 14px; font-size:13px; font-weight:500; cursor:pointer; white-space:nowrap; font-family:'Inter',sans-serif; }
+.cai-chip:hover { background:var(--panel-2); }
+.cai-chip-copy { background:var(--panel-2); color:var(--cyan); font-weight:600; }
+
+/* Bottom navigation */
+.cai-bottomnav { position:fixed; left:0; right:0; bottom:0; z-index:40; display:flex; background:rgba(20,23,29,0.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-top:1px solid var(--hair); padding:7px 2px calc(7px + env(safe-area-inset-bottom)); }
+.cai-navitem { flex:1; background:none; border:none; color:var(--muted); display:flex; flex-direction:column; align-items:center; gap:3px; padding:3px 0; cursor:pointer; font-family:'Inter',sans-serif; font-size:10px; font-weight:600; transition:color .15s; }
+.cai-navitem.active { color:var(--cyan); }
+.cai-navitem svg { transition:transform .15s; }
+.cai-navitem.active svg { transform:translateY(-1px); }
+
+/* Skeleton loaders */
+.cai-skel { background:linear-gradient(90deg, var(--panel) 25%, var(--panel-2) 37%, var(--panel) 63%); background-size:400% 100%; animation:cai-shimmer 1.4s ease infinite; border-radius:14px; }
+@keyframes cai-shimmer { 0% { background-position:100% 0; } 100% { background-position:-100% 0; } }
+
+/* Backup reminder */
+.cai-backup-banner { display:flex; align-items:center; gap:10px; background:rgba(240,136,62,0.12); border:1px solid rgba(240,136,62,0.4); color:var(--amber); border-radius:12px; padding:10px 12px; margin-bottom:12px; font-size:13px; }
+.cai-backup-save { background:var(--amber); color:#1A1206; border:none; border-radius:8px; padding:7px 12px; font-weight:700; font-size:13px; cursor:pointer; font-family:'Inter',sans-serif; white-space:nowrap; }
+.cai-backup-later { background:none; border:none; color:var(--amber); font-size:15px; cursor:pointer; padding:2px 4px; opacity:.7; }
+
+/* Scanner */
+.cai-scanbox { position:relative; border-radius:14px; overflow:hidden; background:#000; margin-bottom:10px; border:1px solid var(--hair); }
+.cai-scanline { position:absolute; left:8%; right:8%; top:50%; height:2px; background:var(--red); box-shadow:0 0 8px var(--red); animation:cai-scan 1.8s ease-in-out infinite; }
+@keyframes cai-scan { 0%,100% { top:25%; } 50% { top:75%; } }
+
 /* Coach card */
 .cai-coach { background:linear-gradient(150deg, #1A2230, #181B22); border:1px solid var(--hair); border-radius:16px; padding:16px; margin-top:12px; }
 .cai-coach-top { display:flex; align-items:center; gap:10px; }
@@ -168,6 +203,8 @@ const CSS = `
 .cai-pbar { height:4px; border-radius:3px; background:var(--panel-2); overflow:hidden; margin-top:7px; }
 .cai-pbar-fill { height:100%; border-radius:3px; background:var(--cyan); transition:width .4s; }
 @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, label:focus-within { outline:2px solid var(--cyan); outline-offset:2px; }
+.cai-skel { will-change:background-position; }
 `;
 const pad = (n) => String(n).padStart(2, "0");
 const keyFromDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -177,7 +214,46 @@ const shortDate = (key) => {
     const [y, m, d] = key.split("-");
     return new Date(y, m - 1, d).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 };
-const DEFAULT_SETTINGS = { target: 2000, sex: "homme", age: 39, weight: "", height: "", activity: 1.55, goal: -400, proteinTarget: 150 };
+const daysBetween = (a, b) => {
+    const [ay, am, ad] = a.split("-"), [by, bm, bd] = b.split("-");
+    return Math.round((new Date(by, bm - 1, bd) - new Date(ay, am - 1, ad)) / 86400000);
+};
+const buzz = (ms = 15) => { try {
+    if (typeof navigator !== "undefined" && navigator.vibrate)
+        navigator.vibrate(ms);
+}
+catch (_) { } };
+async function aiComplete(messages, maxTokens = 1000) {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST", headers: { "Content-Type": "application/json", "x-api-key": (localStorage.getItem("cai_apikey") || ""), "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: maxTokens, messages }),
+    });
+    if (!res.ok)
+        throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    return (data.content || []).map((b) => (b.type === "text" ? b.text : "")).join("").trim();
+}
+function extractJSON(text) {
+    const c = (text || "").replace(/```json|```/g, "").trim();
+    const s = c.indexOf("{"), e = c.lastIndexOf("}");
+    if (s < 0 || e < 0)
+        throw new Error("no json");
+    return JSON.parse(c.slice(s, e + 1));
+}
+function entryFromItems(parsed, photo) {
+    const items = (parsed.items || []).map((it) => ({
+        name: it.name || "Aliment", quantity: it.quantity || "",
+        calories: Math.max(0, Math.round(+it.calories || 0)), protein: Math.max(0, Math.round(+it.protein || 0)),
+        carbs: Math.max(0, Math.round(+it.carbs || 0)), fat: Math.max(0, Math.round(+it.fat || 0)),
+    }));
+    return {
+        id: Date.now() + Math.floor(Math.random() * 1000), photo: photo || null, items, confidence: parsed.confidence || "medium",
+        calories: items.reduce((s, i) => s + i.calories, 0), protein: items.reduce((s, i) => s + i.protein, 0),
+        carbs: items.reduce((s, i) => s + i.carbs, 0), fat: items.reduce((s, i) => s + i.fat, 0),
+        name: items.map((i) => i.name).join(", ") || "Repas",
+    };
+}
+const DEFAULT_SETTINGS = { target: 2000, sex: "homme", age: 39, weight: "", height: "", activity: 1.55, goal: -400, proteinTarget: 150, cycleEnabled: false, trainingDays: 4, carbShift: 300, goalWeight: "" };
 function fileToResizedBase64(file, maxDim = 1024, quality = 0.8) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -207,10 +283,84 @@ function fileToResizedBase64(file, maxDim = 1024, quality = 0.8) {
         reader.readAsDataURL(file);
     });
 }
+// --------------------------- Icônes & navigation --------------------------
+const ICON_PATHS = {
+    today: React.createElement(React.Fragment, null,
+        React.createElement("path", { d: "M3 11l9-8 9 8" }),
+        React.createElement("path", { d: "M5 10v10h14V10" })),
+    weight: React.createElement(React.Fragment, null,
+        React.createElement("path", { d: "M5 17a8 8 0 1 1 14 0" }),
+        React.createElement("path", { d: "M12 16l3.5-4.5" })),
+    week: React.createElement(React.Fragment, null,
+        React.createElement("rect", { x: "4", y: "5", width: "16", height: "15", rx: "2" }),
+        React.createElement("path", { d: "M4 9.5h16M8 3v4M16 3v4" })),
+    lifts: React.createElement(React.Fragment, null,
+        React.createElement("path", { d: "M3 9v6M6 7v10M6 12h12M18 7v10M21 9v6" })),
+    history: React.createElement(React.Fragment, null,
+        React.createElement("path", { d: "M5 20V11M10 20V5M15 20V14M20 20V8" })),
+    tips: React.createElement(React.Fragment, null,
+        React.createElement("path", { d: "M9.5 18h5M10.5 21h3" }),
+        React.createElement("path", { d: "M12 3a6 6 0 0 0-3.8 10.7c.8.7.8 1.6.8 2.3h6c0-.7 0-1.6.8-2.3A6 6 0 0 0 12 3z" })),
+};
+function Icon({ name, size = 22 }) {
+    return (React.createElement("svg", { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }, ICON_PATHS[name]));
+}
+function SkeletonList({ rows = 4, height = 64 }) {
+    return React.createElement("div", null, Array.from({ length: rows }).map((_, i) => React.createElement("div", { key: i, className: "cai-skel", style: { height, marginBottom: 10, opacity: 1 - i * 0.12 } })));
+}
+function BottomNav({ tab, setTab }) {
+    const items = [["today", "Accueil"], ["weight", "Poids"], ["week", "Semaine"], ["lifts", "Muscu"], ["history", "Histo"], ["tips", "Conseils"]];
+    return (React.createElement("nav", { className: "cai-bottomnav" }, items.map(([key, label]) => (React.createElement("button", { key: key, className: `cai-navitem ${tab === key ? "active" : ""}`, onClick: () => setTab(key) },
+        React.createElement(Icon, { name: key, size: 21 }),
+        React.createElement("span", null, label))))));
+}
+function useCountUp(target, dur = 550) {
+    const [val, setVal] = useState(target);
+    const ref = useRef(target);
+    useEffect(() => {
+        const reduce = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const from = ref.current, to = target;
+        if (reduce || from === to) {
+            ref.current = to;
+            setVal(to);
+            return;
+        }
+        let raf, start;
+        const step = (t) => {
+            if (!start)
+                start = t;
+            const p = Math.min(1, (t - start) / dur);
+            const eased = 1 - Math.pow(1 - p, 3);
+            setVal(Math.round(from + (to - from) * eased));
+            if (p < 1)
+                raf = requestAnimationFrame(step);
+            else
+                ref.current = to;
+        };
+        raf = requestAnimationFrame(step);
+        return () => cancelAnimationFrame(raf);
+    }, [target, dur]);
+    return val;
+}
+function CalorieRing({ consumed, budget, remaining, over, sColor, gColor }) {
+    const size = 196, stroke = 14, r = (size - stroke) / 2, circ = 2 * Math.PI * r;
+    const pct = budget > 0 ? Math.min(1, consumed / budget) : 0;
+    const off = circ * (1 - pct);
+    const shown = useCountUp(Math.abs(remaining));
+    return (React.createElement("div", { style: { position: "relative", width: size, height: size, margin: "2px auto 0" } },
+        React.createElement("svg", { width: size, height: size, style: { transform: "rotate(-90deg)" } },
+            React.createElement("circle", { cx: size / 2, cy: size / 2, r: r, fill: "none", stroke: "var(--panel-2)", strokeWidth: stroke }),
+            React.createElement("circle", { cx: size / 2, cy: size / 2, r: r, fill: "none", stroke: gColor, strokeWidth: stroke, strokeLinecap: "round", strokeDasharray: circ, strokeDashoffset: off, style: { transition: "stroke-dashoffset .6s cubic-bezier(.4,0,.2,1), stroke .3s" } })),
+        React.createElement("div", { style: { position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" } },
+            React.createElement("div", { style: { fontFamily: "JetBrains Mono, monospace", fontSize: 10, letterSpacing: 2, textTransform: "uppercase", color: "var(--muted)" } }, over ? "Dépassement" : "Reste"),
+            React.createElement("div", { style: { fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, fontSize: 48, lineHeight: 1.05, color: sColor, fontVariantNumeric: "tabular-nums" } }, shown.toLocaleString("fr-FR")),
+            React.createElement("div", { style: { fontFamily: "JetBrains Mono, monospace", fontSize: 12, color: "var(--muted)" } }, "kcal"))));
+}
 function CalorieAI() {
     const [settings, setSettings] = useState(DEFAULT_SETTINGS);
     const [entries, setEntries] = useState([]);
     const [activeBurn, setActiveBurn] = useState(0);
+    const [trainingToday, setTrainingToday] = useState(false);
     const [loaded, setLoaded] = useState(false);
     const [analyzing, setAnalyzing] = useState(false);
     const [preview, setPreview] = useState(null);
@@ -218,16 +368,41 @@ function CalorieAI() {
     const [tab, setTab] = useState("today");
     const [showSettings, setShowSettings] = useState(false);
     const [showManual, setShowManual] = useState(false);
+    const [showDescribe, setShowDescribe] = useState(false);
+    const [showScanner, setShowScanner] = useState(false);
+    const [recents, setRecents] = useState([]);
     const [history, setHistory] = useState(null);
     const [coach, setCoach] = useState({ text: "", loading: false, err: "" });
+    const [mealIdeas, setMealIdeas] = useState({ text: "", loading: false, err: "" });
+    const [weightData, setWeightData] = useState(null);
+    const [weekData, setWeekData] = useState(null);
+    const [liftData, setLiftData] = useState(null);
+    const [backupDays, setBackupDays] = useState(null);
+    const [showOnboard, setShowOnboard] = useState(false);
     const fileRef = useRef(null);
     const dateKey = todayKey();
+    function effTargetFor(training) {
+        if (!settings.cycleEnabled)
+            return settings.target;
+        const nT = Math.min(6, Math.max(1, Number(settings.trainingDays) || 4));
+        const nR = 7 - nT, sh = Number(settings.carbShift) || 0;
+        return training ? settings.target + sh : settings.target - (nR > 0 ? Math.round(sh * nT / nR) : 0);
+    }
     useEffect(() => {
         (async () => {
+            let hadSettings = false;
             try {
                 const s = await window.storage.get("settings");
-                if (s === null || s === void 0 ? void 0 : s.value)
+                if (s === null || s === void 0 ? void 0 : s.value) {
+                    hadSettings = true;
                     setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(s.value) });
+                }
+            }
+            catch (_) { }
+            try {
+                const ob = await window.storage.get("onboarded");
+                if (!(ob === null || ob === void 0 ? void 0 : ob.value) && !hadSettings)
+                    setShowOnboard(true);
             }
             catch (_) { }
             try {
@@ -238,24 +413,40 @@ function CalorieAI() {
             catch (_) { }
             try {
                 const d = await window.storage.get(`day:${dateKey}`);
-                if (d === null || d === void 0 ? void 0 : d.value)
-                    setActiveBurn(JSON.parse(d.value).activeBurn || 0);
+                if (d === null || d === void 0 ? void 0 : d.value) {
+                    const m = JSON.parse(d.value);
+                    setActiveBurn(m.activeBurn || 0);
+                    setTrainingToday(!!m.training);
+                }
             }
             catch (_) { }
             setLoaded(true);
+            // Vérifie l'ancienneté de la dernière sauvegarde
+            try {
+                const logs = await window.storage.list("log:");
+                const hasData = ((logs === null || logs === void 0 ? void 0 : logs.keys) || []).length > 0;
+                if (hasData) {
+                    const lb = await window.storage.get("lastBackup");
+                    const days = (lb === null || lb === void 0 ? void 0 : lb.value) ? (Date.now() - new Date(lb.value).getTime()) / 86400000 : Infinity;
+                    if (days >= 7)
+                        setBackupDays((lb === null || lb === void 0 ? void 0 : lb.value) ? Math.floor(days) : -1);
+                }
+            }
+            catch (_) { }
         })();
     }, [dateKey]);
-    // Persist today's day-meta (target snapshot + watch burn) whenever it changes
+    // Persist today's day-meta (target snapshot + watch burn + training) whenever it changes
     useEffect(() => {
         if (!loaded)
             return;
         (async () => { try {
-            await window.storage.set(`day:${dateKey}`, JSON.stringify({ target: settings.target, activeBurn }));
+            await window.storage.set(`day:${dateKey}`, JSON.stringify({ target: effTargetFor(trainingToday), activeBurn, training: trainingToday }));
         }
         catch (_) { } })();
-    }, [loaded, dateKey, settings.target, activeBurn]);
+    }, [loaded, dateKey, settings.target, activeBurn, trainingToday]);
     const persistEntries = useCallback(async (next) => {
         setEntries(next);
+        buzz();
         try {
             await window.storage.set(`log:${dateKey}`, JSON.stringify(next));
         }
@@ -268,13 +459,22 @@ function CalorieAI() {
         }
         catch (_) { }
     }, []);
+    async function finishOnboard(partial) {
+        if (partial)
+            persistSettings({ ...settings, ...partial });
+        try {
+            await window.storage.set("onboarded", "1");
+        }
+        catch (_) { }
+        setShowOnboard(false);
+    }
     async function getCoachTip() {
         setCoach({ text: "", loading: true, err: "" });
         const cKcal = entries.reduce((s, e) => s + e.calories, 0);
         const cProt = entries.reduce((s, e) => s + e.protein, 0);
         const cCarb = entries.reduce((s, e) => s + e.carbs, 0);
         const cFat = entries.reduce((s, e) => s + e.fat, 0);
-        const bud = settings.target + (Number(activeBurn) || 0);
+        const bud = effTargetFor(trainingToday) + (Number(activeBurn) || 0);
         const hour = new Date().getHours();
         const moment = hour < 11 ? "matin" : hour < 15 ? "midi" : hour < 19 ? "après-midi" : "soir";
         const meals = entries.map((e) => `${e.name} (${e.calories} kcal, ${e.protein}g prot)`).join("; ") || "rien pour l'instant";
@@ -292,16 +492,29 @@ Donne un conseil PERSONNALISÉ, concret et motivant, en français, basé sur ces
 - Reste sain : ne recommande jamais de sauter des repas ni de descendre dangereusement bas. Le maintien du muscle prime.
 Réponds en texte simple, pas de markdown, pas de listes à puces.`;
         try {
-            const res = await fetch("https://api.anthropic.com/v1/messages", {
-                method: "POST", headers: { "Content-Type": "application/json", "x-api-key": (localStorage.getItem("cai_apikey") || ""), "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-                body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content: prompt }] }),
-            });
-            const data = await res.json();
-            const text = (data.content || []).map((b) => (b.type === "text" ? b.text : "")).join("").trim();
+            const text = await aiComplete([{ role: "user", content: prompt }]);
             setCoach({ text: text || "Pas de conseil disponible, réessaie.", loading: false, err: "" });
         }
         catch (_a) {
             setCoach({ text: "", loading: false, err: "Le coach n'a pas répondu. Réessaie." });
+        }
+    }
+    async function suggestMeals() {
+        setMealIdeas({ text: "", loading: true, err: "" });
+        const cKcal = entries.reduce((s, e) => s + e.calories, 0);
+        const cProt = entries.reduce((s, e) => s + e.protein, 0);
+        const bud = effTargetFor(trainingToday) + (Number(activeBurn) || 0);
+        const remK = bud - cKcal, remP = settings.proteinTarget - cProt;
+        const prompt = `Coach nutrition. Il reste à l'utilisateur ${remK} kcal et ${remP} g de protéines à atteindre aujourd'hui.
+Propose 3 idées de repas ou collations simples et concrètes qui rentrent dans ce budget, en priorisant les protéines. Pour chacune, donne une estimation courte (kcal et protéines).
+Si le budget restant est très bas ou négatif, propose plutôt des options légères et riches en protéines. Reste sain, ne propose jamais de sauter un repas.
+Réponds en français, texte simple, pas de markdown. Maximum 5 lignes.`;
+        try {
+            const t = await aiComplete([{ role: "user", content: prompt }]);
+            setMealIdeas({ text: t || "Pas d'idées disponibles.", loading: false, err: "" });
+        }
+        catch (_a) {
+            setMealIdeas({ text: "", loading: false, err: "Échec. Réessaie." });
         }
     }
     async function loadHistory() {
@@ -340,8 +553,292 @@ Réponds en texte simple, pas de markdown, pas de listes à puces.`;
             setHistory([]);
         }
     }
-    useEffect(() => { if (tab === "history")
-        loadHistory(); /* eslint-disable-next-line */ }, [tab]);
+    async function loadWeight() {
+        setWeightData(null);
+        try {
+            const wlist = await window.storage.list("weight:");
+            const wkeys = ((wlist === null || wlist === void 0 ? void 0 : wlist.keys) || []).map((k) => k.replace("weight:", "")).sort();
+            const pts = [];
+            for (const dk of wkeys) {
+                try {
+                    const w = await window.storage.get(`weight:${dk}`);
+                    if (w === null || w === void 0 ? void 0 : w.value)
+                        pts.push({ date: dk, weight: parseFloat(w.value) });
+                }
+                catch (_) { }
+            }
+            const llist = await window.storage.list("log:");
+            const intake = {};
+            for (const k of ((llist === null || llist === void 0 ? void 0 : llist.keys) || [])) {
+                const dk = k.replace("log:", "");
+                try {
+                    const l = await window.storage.get(`log:${dk}`);
+                    if (l === null || l === void 0 ? void 0 : l.value)
+                        intake[dk] = JSON.parse(l.value).reduce((s, e) => s + (e.calories || 0), 0);
+                }
+                catch (_) { }
+            }
+            const withSmooth = pts.map((p, i) => {
+                const slice = pts.slice(Math.max(0, i - 6), i + 1);
+                return { ...p, smooth: slice.reduce((s, x) => s + x.weight, 0) / slice.length, intake: intake[p.date] || 0 };
+            });
+            setWeightData({ points: withSmooth });
+        }
+        catch (_) {
+            setWeightData({ points: [] });
+        }
+    }
+    async function logWeight(v) {
+        const val = parseFloat(String(v).replace(",", "."));
+        if (!val || val <= 0)
+            return;
+        buzz();
+        try {
+            await window.storage.set(`weight:${dateKey}`, String(val));
+        }
+        catch (_) { }
+        persistSettings({ ...settings, weight: val });
+        loadWeight();
+    }
+    async function exportData() {
+        const dump = {};
+        try {
+            const all = await window.storage.list("");
+            for (const k of ((all === null || all === void 0 ? void 0 : all.keys) || [])) {
+                try {
+                    const r = await window.storage.get(k);
+                    if ((r === null || r === void 0 ? void 0 : r.value) != null)
+                        dump[k] = r.value;
+                }
+                catch (_) { }
+            }
+        }
+        catch (_) { }
+        const payload = { app: "CalorieAI", version: 1, exported: new Date().toISOString(), data: dump };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `calorieai-sauvegarde-${dateKey}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+        try {
+            await window.storage.set("lastBackup", new Date().toISOString());
+        }
+        catch (_) { }
+        setBackupDays(null);
+    }
+    function importData(file) {
+        if (!file)
+            return;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const parsed = JSON.parse(e.target.result);
+                const data = parsed && parsed.data ? parsed.data : parsed;
+                if (typeof data !== "object")
+                    throw new Error("format");
+                if (!window.confirm("Importer cette sauvegarde ? Les données actuelles seront remplacées."))
+                    return;
+                for (const k of Object.keys(data)) {
+                    try {
+                        await window.storage.set(k, data[k]);
+                    }
+                    catch (_) { }
+                }
+                window.location.reload();
+            }
+            catch (_a) {
+                window.alert("Fichier de sauvegarde invalide.");
+            }
+        };
+        reader.readAsText(file);
+    }
+    async function loadWeek() {
+        setWeekData(null);
+        try {
+            const days = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dk = keyFromDate(d);
+                let intake = 0, prot = 0, logged = false, weight = null;
+                try {
+                    const l = await window.storage.get(`log:${dk}`);
+                    if (l === null || l === void 0 ? void 0 : l.value) {
+                        const ents = JSON.parse(l.value);
+                        if (ents.length) {
+                            logged = true;
+                            intake = ents.reduce((s, e) => s + (e.calories || 0), 0);
+                            prot = ents.reduce((s, e) => s + (e.protein || 0), 0);
+                        }
+                    }
+                }
+                catch (_) { }
+                try {
+                    const w = await window.storage.get(`weight:${dk}`);
+                    if (w === null || w === void 0 ? void 0 : w.value)
+                        weight = parseFloat(w.value);
+                }
+                catch (_) { }
+                days.push({ date: dk, intake, prot, logged, weight });
+            }
+            setWeekData(days);
+        }
+        catch (_) {
+            setWeekData([]);
+        }
+    }
+    async function loadLifts() {
+        setLiftData(null);
+        try {
+            const list = await window.storage.list("lift:");
+            const dates = ((list === null || list === void 0 ? void 0 : list.keys) || []).map((k) => k.replace("lift:", "")).sort();
+            const byEx = {};
+            let todayArr = [];
+            for (const dk of dates) {
+                let arr = [];
+                try {
+                    const r = await window.storage.get(`lift:${dk}`);
+                    if (r === null || r === void 0 ? void 0 : r.value)
+                        arr = JSON.parse(r.value);
+                }
+                catch (_) { }
+                if (dk === dateKey)
+                    todayArr = arr;
+                const topByEx = {};
+                for (const s of arr) {
+                    const key = (s.exercise || "").toLowerCase().trim();
+                    if (!key)
+                        continue;
+                    const w = Number(s.weight) || 0;
+                    if (!(key in topByEx) || w > topByEx[key].w)
+                        topByEx[key] = { w, name: s.exercise };
+                }
+                for (const key of Object.keys(topByEx)) {
+                    if (!byEx[key])
+                        byEx[key] = { name: topByEx[key].name, points: [] };
+                    byEx[key].points.push({ date: dk, top: topByEx[key].w });
+                }
+            }
+            const progress = Object.values(byEx).map((e) => ({
+                name: e.name, points: e.points, latest: e.points[e.points.length - 1].top,
+                change: e.points[e.points.length - 1].top - e.points[0].top, sessions: e.points.length,
+            })).sort((a, b) => b.sessions - a.sessions);
+            setLiftData({ today: todayArr, progress });
+        }
+        catch (_) {
+            setLiftData({ today: [], progress: [] });
+        }
+    }
+    async function addLift(item) {
+        if (!item.exercise || !item.exercise.trim())
+            return;
+        buzz();
+        let cur = [];
+        try {
+            const r = await window.storage.get(`lift:${dateKey}`);
+            if (r === null || r === void 0 ? void 0 : r.value)
+                cur = JSON.parse(r.value);
+        }
+        catch (_) { }
+        const entry = { id: Date.now(), exercise: item.exercise.trim(), weight: Number(item.weight) || 0, reps: Number(item.reps) || 0, sets: Number(item.sets) || 0 };
+        try {
+            await window.storage.set(`lift:${dateKey}`, JSON.stringify([entry, ...cur]));
+        }
+        catch (_) { }
+        loadLifts();
+    }
+    async function deleteLift(id) {
+        let cur = [];
+        try {
+            const r = await window.storage.get(`lift:${dateKey}`);
+            if (r === null || r === void 0 ? void 0 : r.value)
+                cur = JSON.parse(r.value);
+        }
+        catch (_) { }
+        try {
+            await window.storage.set(`lift:${dateKey}`, JSON.stringify(cur.filter((x) => x.id !== id)));
+        }
+        catch (_) { }
+        loadLifts();
+    }
+    async function loadRecents() {
+        try {
+            const llist = await window.storage.list("log:");
+            const keys = ((llist === null || llist === void 0 ? void 0 : llist.keys) || []).map((k) => k.replace("log:", "")).sort().reverse().slice(0, 21);
+            const seen = new Map();
+            for (const dk of keys) {
+                try {
+                    const l = await window.storage.get(`log:${dk}`);
+                    if (l === null || l === void 0 ? void 0 : l.value)
+                        for (const e of JSON.parse(l.value)) {
+                            const key = (e.name || "").toLowerCase().trim();
+                            if (key && !seen.has(key))
+                                seen.set(key, e);
+                        }
+                }
+                catch (_) { }
+                if (seen.size >= 12)
+                    break;
+            }
+            setRecents(Array.from(seen.values()).slice(0, 12));
+        }
+        catch (_) {
+            setRecents([]);
+        }
+    }
+    function logRecent(e) {
+        const entry = { ...e, id: Date.now(), photo: null };
+        persistEntries([entry, ...entries]);
+    }
+    async function copyYesterday() {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        try {
+            const l = await window.storage.get(`log:${keyFromDate(d)}`);
+            if (l === null || l === void 0 ? void 0 : l.value) {
+                const ents = JSON.parse(l.value).map((e, i) => ({ ...e, id: Date.now() + i, photo: null }));
+                if (ents.length)
+                    persistEntries([...ents, ...entries]);
+            }
+        }
+        catch (_) { }
+    }
+    async function describeMeal(text) {
+        if (!text || !text.trim())
+            return { error: "Décris d'abord ton repas." };
+        const prompt = `Analyse cette description de repas et estime la nutrition de façon réaliste.
+Réponds UNIQUEMENT en JSON, sans markdown:
+{"items":[{"name":"nom en français","quantity":"portion ex '200 g'","calories":nombre,"protein":nombre,"carbs":nombre,"fat":nombre}],"confidence":"low|medium|high","note":"courte remarque"}
+Calories en kcal, macros en grammes. Description : "${text.replace(/"/g, "'")}"`;
+        try {
+            const t = await aiComplete([{ role: "user", content: prompt }]);
+            const entry = entryFromItems(extractJSON(t), null);
+            if (!entry.items.length)
+                return { error: "Je n'ai pas réussi à analyser. Reformule." };
+            persistEntries([entry, ...entries]);
+            return { ok: true };
+        }
+        catch (_a) {
+            return { error: "L'analyse a échoué. Réessaie ou ajoute à la main." };
+        }
+    }
+    useEffect(() => {
+        if (tab === "history")
+            loadHistory();
+        if (tab === "weight")
+            loadWeight();
+        if (tab === "week")
+            loadWeek();
+        if (tab === "lifts")
+            loadLifts();
+        if (tab === "today")
+            loadRecents();
+        /* eslint-disable-next-line */
+    }, [tab]);
     async function handleFile(e) {
         var _a;
         const inputEl = e.target;
@@ -366,29 +863,11 @@ Réponds UNIQUEMENT avec du JSON valide, sans markdown, sans texte autour:
 {"items":[{"name":"nom en français","quantity":"portion estimée ex '200 g' ou '33 cl'","calories":nombre,"protein":nombre,"carbs":nombre,"fat":nombre}],"confidence":"low|medium|high","note":"courte remarque en français"}
 Estime des portions réalistes. Calories en kcal, macros en grammes. Sépare chaque aliment distinct.`;
         try {
-            const res = await fetch("https://api.anthropic.com/v1/messages", {
-                method: "POST", headers: { "Content-Type": "application/json", "x-api-key": (localStorage.getItem("cai_apikey") || ""), "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-                body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000,
-                    messages: [{ role: "user", content: [
-                                { type: "image", source: { type: "base64", media_type: "image/jpeg", data: r.base64 } },
-                                { type: "text", text: prompt }
-                            ] }] }),
-            });
-            const data = await res.json();
-            const text = (data.content || []).map((b) => (b.type === "text" ? b.text : "")).join("").trim();
-            const cleaned = text.replace(/```json|```/g, "").trim();
-            // Extrait le bloc {...} même si le modèle ajoute du texte autour
-            const jsonStr = cleaned.slice(cleaned.indexOf("{"), cleaned.lastIndexOf("}") + 1);
-            const parsed = JSON.parse(jsonStr);
-            const items = (parsed.items || []).map((it) => ({
-                name: it.name || "Aliment", quantity: it.quantity || "",
-                calories: Math.round(+it.calories || 0), protein: Math.round(+it.protein || 0),
-                carbs: Math.round(+it.carbs || 0), fat: Math.round(+it.fat || 0)
-            }));
-            const entry = { id: Date.now(), photo: r.preview, items, confidence: parsed.confidence || "medium",
-                calories: items.reduce((s, i) => s + i.calories, 0), protein: items.reduce((s, i) => s + i.protein, 0),
-                carbs: items.reduce((s, i) => s + i.carbs, 0), fat: items.reduce((s, i) => s + i.fat, 0),
-                name: items.map((i) => i.name).join(", ") || "Repas" };
+            const text = await aiComplete([{ role: "user", content: [
+                        { type: "image", source: { type: "base64", media_type: "image/jpeg", data: r.base64 } },
+                        { type: "text", text: prompt },
+                    ] }]);
+            const entry = entryFromItems(extractJSON(text), r.preview);
             await persistEntries([entry, ...entries]);
             setPreview(null);
         }
@@ -399,11 +878,10 @@ Estime des portions réalistes. Calories en kcal, macros en grammes. Sépare cha
             setAnalyzing(false);
         }
     }
-    const consumed = entries.reduce((s, e) => s + e.calories, 0);
-    const protein = entries.reduce((s, e) => s + e.protein, 0);
-    const carbs = entries.reduce((s, e) => s + e.carbs, 0);
-    const fat = entries.reduce((s, e) => s + e.fat, 0);
-    const budget = settings.target + (Number(activeBurn) || 0);
+    const { consumed, protein, carbs, fat } = React.useMemo(() => entries.reduce((a, e) => ({ consumed: a.consumed + e.calories, protein: a.protein + e.protein, carbs: a.carbs + e.carbs, fat: a.fat + e.fat }), { consumed: 0, protein: 0, carbs: 0, fat: 0 }), [entries]);
+    const shift = Number(settings.carbShift) || 0;
+    const effTarget = effTargetFor(trainingToday);
+    const budget = effTarget + (Number(activeBurn) || 0);
     const remaining = budget - consumed;
     const over = remaining < 0;
     const pct = budget > 0 ? Math.min(100, (consumed / budget) * 100) : 0;
@@ -419,29 +897,27 @@ Estime des portions réalistes. Calories en kcal, macros en grammes. Sépare cha
                         React.createElement("span", null, "AI")),
                     React.createElement("div", { className: "cai-date", style: { marginTop: 4 } }, prettyDate())),
                 React.createElement("button", { className: "cai-gear", onClick: () => setShowSettings(true), "aria-label": "R\u00E9glages" }, "\u2699")),
-            React.createElement("div", { className: "cai-tabs" },
-                React.createElement("button", { className: `cai-tab ${tab === "today" ? "active" : ""}`, onClick: () => setTab("today") }, "Aujourd'hui"),
-                React.createElement("button", { className: `cai-tab ${tab === "history" ? "active" : ""}`, onClick: () => setTab("history") }, "Historique"),
-                React.createElement("button", { className: `cai-tab ${tab === "tips" ? "active" : ""}`, onClick: () => setTab("tips") }, "Conseils")),
+            backupDays !== null && (React.createElement("div", { className: "cai-backup-banner" },
+                React.createElement("span", { style: { flex: 1 } },
+                    "\u26A0\uFE0F ",
+                    backupDays === -1 ? "Aucune sauvegarde — protège tes données." : `Dernière sauvegarde il y a ${backupDays} j.`),
+                React.createElement("button", { className: "cai-backup-save", onClick: exportData }, "Sauvegarder"),
+                React.createElement("button", { className: "cai-backup-later", onClick: () => setBackupDays(null), "aria-label": "Plus tard" }, "\u2715"))),
             tab === "today" ? (React.createElement(React.Fragment, null,
                 React.createElement("div", { className: "cai-balance" },
-                    React.createElement("div", { className: "cai-bal-label" }, over ? "Dépassement" : "Reste à manger"),
-                    React.createElement("div", { className: "cai-bal-num", style: { color: sColor } },
-                        Math.abs(remaining).toLocaleString("fr-FR"),
-                        React.createElement("span", { className: "cai-bal-unit" }, "kcal")),
-                    React.createElement("div", { className: "cai-bal-state", style: { color: sColor } },
+                    React.createElement(CalorieRing, { consumed: consumed, budget: budget, remaining: remaining, over: over, sColor: sColor, gColor: gColor }),
+                    React.createElement("div", { className: "cai-bal-state", style: { color: sColor, display: "flex", justifyContent: "center", marginTop: 8 } },
                         React.createElement("span", { className: "cai-dot", style: { background: sColor } }),
                         over ? `Surplus de ${Math.abs(remaining)} kcal` : "Déficit net en cours"),
-                    React.createElement("div", { className: "cai-budget-line" },
-                        "Objectif ",
-                        settings.target.toLocaleString("fr-FR"),
+                    React.createElement("div", { className: "cai-budget-line", style: { textAlign: "center" } },
+                        settings.cycleEnabled
+                            ? `${trainingToday ? "Jour d'entraînement" : "Jour de repos"} : objectif ${effTarget.toLocaleString("fr-FR")}`
+                            : `Objectif ${settings.target.toLocaleString("fr-FR")}`,
                         Number(activeBurn) > 0 && ` + ${Number(activeBurn).toLocaleString("fr-FR")} montre`,
                         " = ",
                         budget.toLocaleString("fr-FR"),
-                        " kcal de budget"),
-                    React.createElement("div", { className: "cai-gauge" },
-                        React.createElement("div", { className: "cai-gauge-fill", style: { width: `${pct}%`, background: gColor } })),
-                    React.createElement("div", { className: "cai-gauge-meta" },
+                        " kcal"),
+                    React.createElement("div", { className: "cai-gauge-meta", style: { marginTop: 12 } },
                         React.createElement("span", null,
                             consumed.toLocaleString("fr-FR"),
                             " consomm\u00E9es"),
@@ -454,6 +930,15 @@ Estime des portions réalistes. Calories en kcal, macros en grammes. Sépare cha
                         React.createElement("div", { className: "cai-watch-lab" }, "D\u00E9pense active \u00B7 montre"),
                         React.createElement("div", { className: "cai-watch-hint" }, "Reporte les calories actives affich\u00E9es par ta montre")),
                     React.createElement("input", { className: "cai-watch-input", type: "number", inputMode: "numeric", value: activeBurn || "", placeholder: "0", onChange: (e) => setActiveBurn(Number(e.target.value) || 0) })),
+                settings.cycleEnabled && (React.createElement("div", { className: "cai-watch", style: { marginTop: 10 } },
+                    React.createElement("span", { className: "cai-watch-ic" }, trainingToday ? "🏋️" : "🛋️"),
+                    React.createElement("div", { className: "cai-watch-body" },
+                        React.createElement("div", { className: "cai-watch-lab" },
+                            "Aujourd'hui : ",
+                            trainingToday ? "entraînement" : "repos"),
+                        React.createElement("div", { className: "cai-watch-hint" }, trainingToday ? `+${shift} kcal (glucides) pour la perf` : `objectif réduit pour compenser`)),
+                    React.createElement("button", { onClick: () => setTrainingToday((v) => !v), style: { border: "none", borderRadius: 9, padding: "9px 14px", fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif",
+                            background: trainingToday ? "var(--green)" : "var(--panel-2)", color: trainingToday ? "#04161F" : "var(--txt)" } }, trainingToday ? "Entraînement" : "Repos"))),
                 React.createElement("div", { className: "cai-macros" },
                     React.createElement("div", { className: "cai-macro" },
                         React.createElement("div", { className: "cai-macro-val", style: { color: "var(--cyan)" } },
@@ -487,15 +972,35 @@ Estime des portions réalistes. Calories en kcal, macros en grammes. Sépare cha
                     coach.text && React.createElement(React.Fragment, null,
                         React.createElement("div", { className: "cai-coach-text" }, coach.text),
                         React.createElement("button", { className: "cai-coach-refresh", onClick: getCoachTip }, "\u21BB Nouveau conseil"))),
+                React.createElement("div", { className: "cai-coach", style: { marginTop: 10 } },
+                    React.createElement("div", { className: "cai-coach-top" },
+                        React.createElement("span", { className: "cai-coach-ic" }, "\uD83C\uDF7D\uFE0F"),
+                        React.createElement("span", { className: "cai-coach-title" }, "Id\u00E9es de repas"),
+                        !mealIdeas.text && React.createElement("button", { className: "cai-coach-btn", onClick: suggestMeals, disabled: mealIdeas.loading }, mealIdeas.loading ? "…" : "Proposer")),
+                    mealIdeas.loading && React.createElement("div", { className: "cai-coach-text", style: { color: "var(--cyan)", display: "flex", alignItems: "center", gap: 8 } },
+                        React.createElement("span", { className: "cai-spin" }),
+                        " Recherche d'id\u00E9es selon ton budget restant\u2026"),
+                    mealIdeas.err && React.createElement("div", { className: "cai-coach-text", style: { color: "var(--red)" } }, mealIdeas.err),
+                    mealIdeas.text && React.createElement(React.Fragment, null,
+                        React.createElement("div", { className: "cai-coach-text" }, mealIdeas.text),
+                        React.createElement("button", { className: "cai-coach-refresh", onClick: suggestMeals }, "\u21BB Autres id\u00E9es"))),
                 React.createElement("div", { className: "cai-actions", style: { flexDirection: "column" } },
                     React.createElement("label", { className: "cai-btn cai-btn-primary", style: analyzing ? { opacity: 0.5, pointerEvents: "none" } : undefined },
                         "\uD83D\uDCF7 Prendre une photo",
                         React.createElement("input", { ref: fileRef, type: "file", accept: "image/*", capture: "environment", onChange: handleFile, disabled: analyzing, style: { position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" } })),
-                    React.createElement("div", { style: { display: "flex", gap: 10 } },
-                        React.createElement("label", { className: "cai-btn cai-btn-ghost", style: analyzing ? { flex: 1, opacity: 0.5, pointerEvents: "none" } : { flex: 1 } },
+                    React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 } },
+                        React.createElement("label", { className: "cai-btn cai-btn-ghost", style: analyzing ? { opacity: 0.5, pointerEvents: "none" } : undefined },
                             "\uD83D\uDDBC Galerie",
                             React.createElement("input", { type: "file", accept: "image/*", onChange: handleFile, disabled: analyzing, style: { position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden" } })),
-                        React.createElement("button", { className: "cai-btn cai-btn-ghost", style: { flex: 1 }, onClick: () => setShowManual(true), disabled: analyzing }, "\u270E \u00C0 la main"))),
+                        React.createElement("button", { className: "cai-btn cai-btn-ghost", onClick: () => setShowScanner(true), disabled: analyzing }, "\uD83D\uDD33 Scanner"),
+                        React.createElement("button", { className: "cai-btn cai-btn-ghost", onClick: () => setShowDescribe(true), disabled: analyzing }, "\uD83C\uDFA4 D\u00E9crire"),
+                        React.createElement("button", { className: "cai-btn cai-btn-ghost", onClick: () => setShowManual(true), disabled: analyzing }, "\u270E Manuel"))),
+                !analyzing && (React.createElement("div", { className: "cai-recents" },
+                    React.createElement("button", { className: "cai-chip cai-chip-copy", onClick: copyYesterday }, "\uD83D\uDCCB Copier hier"),
+                    recents.map((r, i) => (React.createElement("button", { className: "cai-chip", key: i, onClick: () => logRecent(r), title: `${r.calories} kcal` },
+                        r.name.length > 22 ? r.name.slice(0, 22) + "…" : r.name,
+                        " ",
+                        React.createElement("span", { style: { color: "var(--muted)" } }, r.calories)))))),
                 preview && analyzing && (React.createElement("div", { className: "cai-preview" },
                     React.createElement("img", { src: preview, alt: "repas" }),
                     React.createElement("div", { className: "cai-analyzing" },
@@ -503,7 +1008,7 @@ Estime des portions réalistes. Calories en kcal, macros en grammes. Sépare cha
                         " Analyse de l'image en cours\u2026"))),
                 error && React.createElement("div", { className: "cai-err" }, error),
                 React.createElement("div", { className: "cai-sec" }, "Journal du jour"),
-                !loaded ? React.createElement("div", { className: "cai-empty" }, "Chargement\u2026")
+                !loaded ? React.createElement(SkeletonList, { rows: 3 })
                     : entries.length === 0 ? React.createElement("div", { className: "cai-empty" },
                         "Aucun repas enregistr\u00E9 aujourd'hui.",
                         React.createElement("br", null),
@@ -534,14 +1039,18 @@ Estime des portions réalistes. Calories en kcal, macros en grammes. Sépare cha
                                         e.calories,
                                         React.createElement("span", { style: { fontSize: 11, color: "var(--muted)", fontWeight: 400 } }, " kcal")),
                                     React.createElement("button", { className: "cai-entry-del", onClick: () => persistEntries(entries.filter((x) => x.id !== e.id)), "aria-label": "Supprimer" }, "\u2715"))));
-                        }))) : tab === "history" ? (React.createElement(HistoryView, { history: history })) : (React.createElement(TipsView, null))),
-        showSettings && React.createElement(SettingsModal, { settings: settings, onSave: (s) => { persistSettings(s); setShowSettings(false); }, onClose: () => setShowSettings(false) }),
-        showManual && React.createElement(ManualModal, { onAdd: (e) => { persistEntries([e, ...entries]); setShowManual(false); }, onClose: () => setShowManual(false) })));
+                        }))) : tab === "history" ? (React.createElement(HistoryView, { history: history })) : tab === "weight" ? (React.createElement(WeightView, { data: weightData, settings: settings, todayKey: dateKey, onLog: logWeight, onApplyTarget: (t) => persistSettings({ ...settings, target: t }) })) : tab === "week" ? (React.createElement(WeekView, { data: weekData, settings: settings })) : tab === "lifts" ? (React.createElement(LiftsView, { data: liftData, onAdd: addLift, onDelete: deleteLift })) : (React.createElement(TipsView, null))),
+        showSettings && React.createElement(SettingsModal, { settings: settings, onSave: (s) => { persistSettings(s); setShowSettings(false); }, onClose: () => setShowSettings(false), onExport: exportData, onImport: importData, onReplay: () => { setShowSettings(false); setShowOnboard(true); } }),
+        showManual && React.createElement(ManualModal, { onAdd: (e) => { persistEntries([e, ...entries]); setShowManual(false); }, onClose: () => setShowManual(false) }),
+        showDescribe && React.createElement(DescribeModal, { onSubmit: describeMeal, onClose: () => setShowDescribe(false) }),
+        showScanner && React.createElement(ScannerModal, { onAdd: (e) => { persistEntries([e, ...entries]); setShowScanner(false); }, onClose: () => setShowScanner(false) }),
+        React.createElement(BottomNav, { tab: tab, setTab: setTab }),
+        showOnboard && React.createElement(OnboardModal, { onFinish: finishOnboard })));
 }
 // --------------------------- History view ----------------------------------
 function HistoryView({ history }) {
     if (history === null)
-        return React.createElement("div", { className: "cai-empty" }, "Chargement de l'historique\u2026");
+        return React.createElement(SkeletonList, { rows: 5 });
     if (history.length === 0)
         return React.createElement("div", { className: "cai-empty" },
             "Pas encore d'historique.",
@@ -603,6 +1112,286 @@ function CumulativeChart({ data }) {
         React.createElement("path", { d: area, fill: "url(#caiFill)" }),
         React.createElement("path", { d: line, fill: "none", stroke: "#34D399", strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round" }),
         data.map((d, i) => React.createElement("circle", { key: i, cx: x(i), cy: y(d.cumulative), r: "2.5", fill: "#34D399" }))));
+}
+// --------------------------- Poids & objectif adaptatif --------------------
+function computeAdaptive(points, goal) {
+    if (!points || points.length < 2)
+        return { ready: false, reason: "few" };
+    const first = points[0], last = points[points.length - 1];
+    const span = daysBetween(first.date, last.date);
+    if (span < 7)
+        return { ready: false, reason: "span", span };
+    const intakeVals = points.map((p) => p.intake).filter((v) => v > 0);
+    if (intakeVals.length < 5)
+        return { ready: false, reason: "intake", span };
+    const rateKgDay = (last.smooth - first.smooth) / span;
+    const avgIntake = intakeVals.reduce((a, b) => a + b, 0) / intakeVals.length;
+    const tdee = Math.round(avgIntake - rateKgDay * 7700);
+    const suggested = Math.round((tdee + goal) / 10) * 10;
+    const sane = tdee >= 1200 && tdee <= 5000;
+    return { ready: true, span, rateKgWeek: rateKgDay * 7, avgIntake: Math.round(avgIntake), tdee, suggested, sane };
+}
+function WeightView({ data, settings, todayKey, onLog, onApplyTarget }) {
+    const [input, setInput] = useState("");
+    if (data === null)
+        return React.createElement(SkeletonList, { rows: 4 });
+    const points = data.points || [];
+    const today = points.find((p) => p.date === todayKey);
+    const last = points[points.length - 1];
+    const adaptive = computeAdaptive(points, settings.goal);
+    return (React.createElement(React.Fragment, null,
+        React.createElement("div", { className: "cai-balance", style: { paddingBottom: 16 } },
+            React.createElement("div", { className: "cai-bal-label" }, "Poids actuel (tendance liss\u00E9e)"),
+            React.createElement("div", { className: "cai-bal-num", style: { color: "var(--cyan)", fontSize: 46 } },
+                last ? last.smooth.toFixed(1) : "—",
+                React.createElement("span", { className: "cai-bal-unit" }, "kg")),
+            last && (React.createElement("div", { className: "cai-budget-line" },
+                "Derni\u00E8re pes\u00E9e brute : ",
+                last.weight.toFixed(1),
+                " kg \u00B7 ",
+                points.length,
+                " pes\u00E9e",
+                points.length > 1 ? "s" : "",
+                " enregistr\u00E9e",
+                points.length > 1 ? "s" : ""))),
+        React.createElement("div", { style: { display: "flex", gap: 10, margin: "12px 0" } },
+            React.createElement("input", { className: "cai-input", type: "number", inputMode: "decimal", step: "0.1", placeholder: today ? `Aujourd'hui : ${today.weight.toFixed(1)} kg` : "Ton poids du jour (kg)", value: input, onChange: (e) => setInput(e.target.value), style: { flex: 1 } }),
+            React.createElement("button", { className: "cai-modal-btn", style: { width: "auto", marginTop: 0, padding: "12px 18px" }, onClick: () => { onLog(input); setInput(""); } }, "Enregistrer")),
+        React.createElement("div", { className: "cai-chart-card" },
+            React.createElement("div", { className: "cai-chart-head" },
+                React.createElement("span", { className: "cai-chart-title" }, "Tendance de poids")),
+            React.createElement(WeightChart, { points: points })),
+        React.createElement("div", { className: "cai-sec" }, "Objectif adaptatif"),
+        React.createElement("div", { className: "cai-coach" }, adaptive.ready ? (React.createElement(React.Fragment, null,
+            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", marginBottom: 10 } },
+                React.createElement("div", null,
+                    React.createElement("div", { className: "cai-macro-lab" }, "D\u00E9pense estim\u00E9e"),
+                    React.createElement("div", { className: "cai-chart-big", style: { color: "var(--cyan)" } },
+                        adaptive.tdee.toLocaleString("fr-FR"),
+                        React.createElement("span", { style: { fontSize: 13, color: "var(--muted)" } }, " kcal/j"))),
+                React.createElement("div", { style: { textAlign: "right" } },
+                    React.createElement("div", { className: "cai-macro-lab" }, "Tendance r\u00E9elle"),
+                    React.createElement("div", { className: "cai-chart-big", style: { color: adaptive.rateKgWeek <= 0 ? "var(--green)" : "var(--amber)" } },
+                        adaptive.rateKgWeek > 0 ? "+" : "",
+                        adaptive.rateKgWeek.toFixed(2),
+                        React.createElement("span", { style: { fontSize: 13, color: "var(--muted)" } }, " kg/sem")))),
+            React.createElement("div", { className: "cai-coach-text", style: { marginTop: 0 } },
+                "Calcul\u00E9 sur tes ",
+                adaptive.span,
+                " derniers jours (poids r\u00E9el \u00D7 calories r\u00E9elles), pas sur une formule th\u00E9orique. Objectif sugg\u00E9r\u00E9 pour ton but : ",
+                React.createElement("strong", { style: { color: "var(--txt)" } },
+                    adaptive.suggested.toLocaleString("fr-FR"),
+                    " kcal/jour"),
+                ".",
+                !adaptive.sane && " (valeur inhabituelle — vérifie que tes pesées et ta saisie sont régulières.)"),
+            React.createElement("button", { className: "cai-coach-btn", style: { marginTop: 12 }, onClick: () => onApplyTarget(adaptive.suggested) },
+                "Appliquer ",
+                adaptive.suggested.toLocaleString("fr-FR"),
+                " kcal comme objectif"))) : (React.createElement("div", { className: "cai-coach-text", style: { marginTop: 0 } }, adaptive.reason === "intake"
+            ? "Encore un peu de données : continue à logger tes repas en plus de te peser. Il faut au moins 5 jours de saisie sur la période."
+            : "Pèse-toi régulièrement (idéalement chaque matin) pendant ~1 à 2 semaines. L'app croisera alors ton poids réel et tes calories pour estimer ta vraie dépense et ajuster ton objectif automatiquement."))),
+        (() => {
+            const goalW = Number(settings.goalWeight);
+            if (!goalW || points.length < 2 || !last)
+                return null;
+            const span = daysBetween(points[0].date, last.date) || 1;
+            const ratePerWeek = (last.smooth - points[0].smooth) / span * 7;
+            const cur = last.smooth;
+            const losing = goalW < cur, gaining = goalW > cur;
+            const toward = (losing && ratePerWeek < -0.05) || (gaining && ratePerWeek > 0.05);
+            let body, color = "var(--cyan)";
+            if (Math.abs(cur - goalW) < 0.2) {
+                body = "Objectif de poids atteint, bravo ! 🎉";
+                color = "var(--green)";
+            }
+            else if (!toward) {
+                body = `Ta tendance actuelle (${ratePerWeek > 0 ? "+" : ""}${ratePerWeek.toFixed(2)} kg/sem) ne te rapproche pas de ${goalW} kg. Ajuste ton objectif calorique.`;
+                color = "var(--amber)";
+            }
+            else {
+                const weeks = Math.abs(cur - goalW) / Math.abs(ratePerWeek);
+                const d = new Date();
+                d.setDate(d.getDate() + Math.round(weeks * 7));
+                body = `À ce rythme (${ratePerWeek > 0 ? "+" : ""}${ratePerWeek.toFixed(2)} kg/sem), tu atteins ${goalW} kg vers le ${d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} (~${Math.ceil(weeks)} semaines).`;
+                color = "var(--green)";
+            }
+            return (React.createElement(React.Fragment, null,
+                React.createElement("div", { className: "cai-sec" }, "Objectif de poids"),
+                React.createElement("div", { className: "cai-coach" },
+                    React.createElement("div", { className: "cai-coach-text", style: { marginTop: 0, color, fontWeight: 600 } }, body))));
+        })(),
+        React.createElement("div", { className: "cai-disclaimer" }, "P\u00E8se-toi dans les m\u00EAmes conditions (au r\u00E9veil, \u00E0 jeun) pour une tendance fiable. Le poids quotidien fluctue avec l'eau et le glycog\u00E8ne \u2014 c'est la courbe liss\u00E9e qui compte.")));
+}
+function WeightChart({ points }) {
+    if (!points || points.length < 2)
+        return React.createElement("div", { style: { color: "var(--muted)", fontSize: 13, textAlign: "center", padding: "24px 0" } }, "Enregistre ton poids au moins 2 jours pour voir la tendance.");
+    const W = 480, H = 180, pL = 8, pR = 8, pT = 14, pB = 18;
+    const all = points.map((p) => p.weight).concat(points.map((p) => p.smooth));
+    let min = Math.min(...all), max = Math.max(...all);
+    if (min === max) {
+        min -= 1;
+        max += 1;
+    }
+    const padv = (max - min) * 0.15 || 0.5;
+    min -= padv;
+    max += padv;
+    const x = (i) => pL + (i / (points.length - 1)) * (W - pL - pR);
+    const y = (v) => pT + (1 - (v - min) / (max - min)) * (H - pT - pB);
+    const smooth = points.map((p, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(p.smooth).toFixed(1)}`).join(" ");
+    return (React.createElement("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", preserveAspectRatio: "none", style: { display: "block" } },
+        points.map((p, i) => React.createElement("circle", { key: i, cx: x(i), cy: y(p.weight), r: "2", fill: "#8A909C", opacity: "0.55" })),
+        React.createElement("path", { d: smooth, fill: "none", stroke: "#38BDF8", strokeWidth: "2.5", strokeLinejoin: "round", strokeLinecap: "round" }),
+        points.length > 0 && React.createElement("circle", { cx: x(points.length - 1), cy: y(points[points.length - 1].smooth), r: "3.5", fill: "#38BDF8" })));
+}
+// --------------------------- Suivi des charges (Muscu) ---------------------
+function LiftsView({ data, onAdd, onDelete }) {
+    const [f, setF] = useState({ exercise: "", weight: "", reps: "", sets: "" });
+    if (data === null)
+        return React.createElement(SkeletonList, { rows: 4 });
+    const today = data.today || [];
+    const progress = data.progress || [];
+    const known = [...new Set(progress.map((p) => p.name))];
+    function submit() {
+        if (!f.exercise.trim())
+            return;
+        onAdd(f);
+        setF({ exercise: "", weight: "", reps: "", sets: "" });
+    }
+    return (React.createElement(React.Fragment, null,
+        React.createElement("div", { className: "cai-sec", style: { marginTop: 4 } }, "S\u00E9ance du jour"),
+        React.createElement("div", { className: "cai-coach", style: { marginTop: 0 } },
+            React.createElement("input", { className: "cai-input", list: "cai-ex", value: f.exercise, placeholder: "Exercice (ex D\u00E9velopp\u00E9 couch\u00E9)", onChange: (e) => setF({ ...f, exercise: e.target.value }) }),
+            React.createElement("datalist", { id: "cai-ex" }, known.map((n, i) => React.createElement("option", { key: i, value: n }))),
+            React.createElement("div", { className: "cai-row", style: { marginTop: 10 } },
+                React.createElement("div", null,
+                    React.createElement("label", { style: { fontSize: 11, color: "var(--muted)" } }, "Poids (kg)"),
+                    React.createElement("input", { className: "cai-input", type: "number", inputMode: "decimal", value: f.weight, onChange: (e) => setF({ ...f, weight: e.target.value }) })),
+                React.createElement("div", null,
+                    React.createElement("label", { style: { fontSize: 11, color: "var(--muted)" } }, "Reps"),
+                    React.createElement("input", { className: "cai-input", type: "number", inputMode: "numeric", value: f.reps, onChange: (e) => setF({ ...f, reps: e.target.value }) })),
+                React.createElement("div", null,
+                    React.createElement("label", { style: { fontSize: 11, color: "var(--muted)" } }, "S\u00E9ries"),
+                    React.createElement("input", { className: "cai-input", type: "number", inputMode: "numeric", value: f.sets, onChange: (e) => setF({ ...f, sets: e.target.value }) }))),
+            React.createElement("button", { className: "cai-modal-btn", onClick: submit, disabled: !f.exercise.trim(), style: { opacity: f.exercise.trim() ? 1 : 0.5 } }, "Ajouter \u00E0 la s\u00E9ance")),
+        today.length > 0 && today.map((l) => (React.createElement("div", { className: "cai-hrow", key: l.id },
+            React.createElement("div", { style: { flex: 1 } },
+                React.createElement("div", { style: { fontWeight: 600, fontSize: 14 } }, l.exercise),
+                React.createElement("div", { className: "cai-hrow-sub" },
+                    l.weight,
+                    " kg \u00B7 ",
+                    l.sets,
+                    " \u00D7 ",
+                    l.reps)),
+            React.createElement("button", { className: "cai-entry-del", onClick: () => onDelete(l.id), "aria-label": "Supprimer" }, "\u2715")))),
+        React.createElement("div", { className: "cai-sec" }, "Progression"),
+        progress.length === 0 ? (React.createElement("div", { className: "cai-empty" },
+            "Logge tes s\u00E9ries pour suivre ta progression.",
+            React.createElement("br", null),
+            "Garder ou monter tes charges en s\u00E8che = tu pr\u00E9serves ton muscle.")) : progress.map((p, i) => (React.createElement("div", { className: "cai-entry", key: i, style: { alignItems: "center" } },
+            React.createElement("div", { className: "cai-entry-body" },
+                React.createElement("div", { className: "cai-entry-name" }, p.name),
+                React.createElement("div", { className: "cai-entry-macros" },
+                    p.sessions,
+                    " s\u00E9ance",
+                    p.sessions > 1 ? "s" : "",
+                    " \u00B7 max ",
+                    p.latest,
+                    " kg",
+                    p.change !== 0 && React.createElement("span", { style: { color: p.change > 0 ? "var(--green)" : "var(--amber)", marginLeft: 6 } },
+                        p.change > 0 ? "↑" : "↓",
+                        " ",
+                        Math.abs(p.change),
+                        " kg"))),
+            React.createElement(LiftSpark, { points: p.points })))),
+        progress.length > 0 && React.createElement("div", { className: "cai-disclaimer" }, "Si tes charges tiennent ou montent pendant que ton poids baisse, c'est le signe que tu perds du gras en gardant ton muscle.")));
+}
+function LiftSpark({ points }) {
+    if (!points || points.length < 2)
+        return React.createElement("div", { style: { width: 80, textAlign: "right", color: "var(--muted)", fontSize: 11, fontFamily: "JetBrains Mono, monospace" } }, "\u2014");
+    const W = 80, H = 34;
+    const vals = points.map((p) => p.top);
+    let min = Math.min(...vals), max = Math.max(...vals);
+    if (min === max) {
+        min -= 1;
+        max += 1;
+    }
+    const x = (i) => (i / (points.length - 1)) * W;
+    const y = (v) => 4 + (1 - (v - min) / (max - min)) * (H - 8);
+    const line = points.map((p, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(p.top).toFixed(1)}`).join(" ");
+    const up = points[points.length - 1].top >= points[0].top;
+    return (React.createElement("svg", { width: W, height: H, style: { flexShrink: 0 } },
+        React.createElement("path", { d: line, fill: "none", stroke: up ? "#34D399" : "#F0883E", strokeWidth: "2", strokeLinejoin: "round", strokeLinecap: "round" }),
+        React.createElement("circle", { cx: x(points.length - 1), cy: y(points[points.length - 1].top), r: "2.5", fill: up ? "#34D399" : "#F0883E" })));
+}
+// --------------------------- Bilan hebdomadaire ----------------------------
+function WeekView({ data, settings }) {
+    if (data === null)
+        return React.createElement(SkeletonList, { rows: 4 });
+    const loggedDays = data.filter((d) => d.logged);
+    const nLogged = loggedDays.length;
+    const avgIntake = nLogged ? Math.round(loggedDays.reduce((s, d) => s + d.intake, 0) / nLogged) : 0;
+    const protHit = loggedDays.filter((d) => d.prot >= settings.proteinTarget).length;
+    const weights = data.filter((d) => d.weight != null);
+    let trend = null;
+    if (weights.length >= 2) {
+        const span = daysBetween(weights[0].date, weights[weights.length - 1].date) || 1;
+        trend = ((weights[weights.length - 1].weight - weights[0].weight) / span) * 7;
+    }
+    // Recommandation
+    let reco = "Continue à logger pour obtenir une recommandation fiable.";
+    let recoColor = "var(--muted)";
+    if (nLogged >= 4) {
+        const goalDeficit = settings.goal < 0;
+        if (trend != null) {
+            if (goalDeficit && trend > -0.1) {
+                reco = "Tu stagnes ou montes alors que tu vises une perte. Baisse d'environ 150-200 kcal, ou ajoute de l'activité.";
+                recoColor = "var(--amber)";
+            }
+            else if (goalDeficit && trend < -1.2) {
+                reco = "Perte un peu rapide : risque de fonte musculaire. Remonte de ~150 kcal pour préserver le muscle.";
+                recoColor = "var(--amber)";
+            }
+            else if (goalDeficit) {
+                reco = "Parfait, tu perds à bon rythme. Garde le cap.";
+                recoColor = "var(--green)";
+            }
+            else if (settings.goal > 0 && trend < 0.05) {
+                reco = "Prise de masse au point mort : ajoute ~150 kcal (plutôt des glucides).";
+                recoColor = "var(--amber)";
+            }
+            else {
+                reco = "Tendance cohérente avec ton objectif. Continue.";
+                recoColor = "var(--green)";
+            }
+        }
+        else {
+            reco = "Pense à te peser régulièrement : c'est ce qui permet d'ajuster l'objectif.";
+            recoColor = "var(--cyan)";
+        }
+    }
+    const Stat = ({ val, unit, lab, color }) => (React.createElement("div", { className: "cai-macro", style: { textAlign: "left" } },
+        React.createElement("div", { className: "cai-macro-val", style: { color: color || "var(--txt)" } },
+            val,
+            React.createElement("span", { style: { fontSize: 13, color: "var(--muted)" } }, unit)),
+        React.createElement("div", { className: "cai-macro-lab" }, lab)));
+    return (React.createElement(React.Fragment, null,
+        React.createElement("div", { className: "cai-sec", style: { marginTop: 4 } }, "Bilan des 7 derniers jours"),
+        React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 } },
+            React.createElement(Stat, { val: `${nLogged}`, unit: "/7", lab: "Jours logu\u00E9s", color: nLogged >= 5 ? "var(--green)" : "var(--amber)" }),
+            React.createElement(Stat, { val: avgIntake ? avgIntake.toLocaleString("fr-FR") : "—", unit: " kcal", lab: "Moyenne / jour", color: "var(--cyan)" }),
+            React.createElement(Stat, { val: `${protHit}`, unit: `/${nLogged || 0}`, lab: "Prot\u00E9ines \u00E0 l'objectif", color: protHit >= Math.max(1, nLogged) * 0.7 ? "var(--green)" : "var(--amber)" }),
+            React.createElement(Stat, { val: trend != null ? `${trend > 0 ? "+" : ""}${trend.toFixed(2)}` : "—", unit: " kg/sem", lab: "Tendance poids", color: trend != null ? (trend <= 0 ? "var(--green)" : "var(--amber)") : "var(--muted)" })),
+        React.createElement("div", { className: "cai-sec" }, "Recommandation"),
+        React.createElement("div", { className: "cai-coach" },
+            React.createElement("div", { className: "cai-coach-text", style: { marginTop: 0, color: recoColor, fontWeight: 600 } }, reco)),
+        React.createElement("div", { className: "cai-sec" }, "Jour par jour"),
+        data.map((d) => (React.createElement("div", { className: "cai-hrow", key: d.date },
+            React.createElement("span", { className: "cai-hrow-date" }, shortDate(d.date)),
+            React.createElement("div", { style: { flex: 1 } },
+                React.createElement("div", { className: "cai-hrow-sub" },
+                    d.logged ? `${d.intake} kcal · ${d.prot} g prot` : "Non logué",
+                    d.weight != null ? ` · ${d.weight.toFixed(1)} kg` : "")),
+            d.logged && React.createElement("span", { style: { fontSize: 14 } }, d.prot >= settings.proteinTarget ? "💪" : "·"))))));
 }
 // --------------------------- Tips (sèche) ----------------------------------
 const TIPS = [
@@ -740,8 +1529,91 @@ function TipsView() {
             open === i && React.createElement("div", { className: "cai-tip-body" }, t.body)))),
         React.createElement("div", { className: "cai-disclaimer" }, "Rep\u00E8res g\u00E9n\u00E9raux de nutrition et d'entra\u00EEnement, pas un avis m\u00E9dical. Pour un compl\u00E9ment combin\u00E9 \u00E0 un traitement ou une condition de sant\u00E9, demande conseil \u00E0 un m\u00E9decin ou un pharmacien.")));
 }
+// --------------------------- Onboarding ------------------------------------
+function OnboardModal({ onFinish }) {
+    const [step, setStep] = useState(0);
+    const [goal, setGoal] = useState(-400);
+    const [p, setP] = useState({ sex: "homme", age: 39, weight: "", height: "", activity: 1.55 });
+    const num = (v) => (v === "" ? "" : Number(v));
+    let maintenance = null, target = null, protein = null;
+    if (p.weight && p.height && p.age) {
+        maintenance = Math.round((10 * +p.weight + 6.25 * +p.height - 5 * +p.age + (p.sex === "homme" ? 5 : -161)) * +p.activity);
+        target = maintenance + goal;
+        protein = Math.round(+p.weight * 2);
+    }
+    function finish() {
+        const out = { goal };
+        if (target) {
+            out.target = target;
+            out.weight = +p.weight;
+            out.sex = p.sex;
+            out.age = +p.age;
+            out.height = +p.height;
+            out.activity = +p.activity;
+            out.proteinTarget = protein;
+        }
+        onFinish(out);
+    }
+    return (React.createElement("div", { className: "cai-overlay", style: { alignItems: "stretch", zIndex: 60 } },
+        React.createElement("div", { className: "cai-modal", style: { borderRadius: 0, maxHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center" }, onClick: (e) => e.stopPropagation() },
+            step === 0 && (React.createElement("div", { style: { textAlign: "center", padding: "30px 8px" } },
+                React.createElement("div", { style: { fontFamily: "Space Grotesk, sans-serif", fontWeight: 700, fontSize: 30, letterSpacing: -1 } },
+                    "Calorie",
+                    React.createElement("span", { style: { color: "var(--cyan)" } }, "AI")),
+                React.createElement("div", { style: { color: "var(--muted)", fontSize: 15, lineHeight: 1.6, margin: "16px 0 28px" } }, "Ton coach de poids et de muscle. Logge tes repas en photo, suis ta vraie tendance, et laisse l'app ajuster ton objectif toute seule."),
+                React.createElement("button", { className: "cai-modal-btn", onClick: () => setStep(1) }, "Commencer"),
+                React.createElement("button", { className: "cai-modal-close", onClick: () => onFinish(null) }, "Passer"))),
+            step === 1 && (React.createElement("div", null,
+                React.createElement("div", { className: "cai-modal-title" }, "Ton objectif"),
+                [[-400, "Perdre du poids", "Déficit modéré, en gardant le muscle"], [0, "Maintenir", "Stabiliser ton poids actuel"], [300, "Prendre du muscle", "Léger surplus pour construire"]].map(([v, t, d]) => (React.createElement("button", { key: v, onClick: () => setGoal(v), style: {
+                        width: "100%", textAlign: "left", marginBottom: 10, padding: 14, borderRadius: 12, cursor: "pointer", fontFamily: "Inter, sans-serif",
+                        border: `1px solid ${goal === v ? "var(--cyan)" : "var(--hair)"}`, background: goal === v ? "rgba(56,189,248,0.1)" : "var(--panel-2)", color: "var(--txt)"
+                    } },
+                    React.createElement("div", { style: { fontWeight: 600, fontSize: 15 } }, t),
+                    React.createElement("div", { style: { fontSize: 12, color: "var(--muted)", marginTop: 2 } }, d)))),
+                React.createElement("button", { className: "cai-modal-btn", onClick: () => setStep(2) }, "Continuer"))),
+            step === 2 && (React.createElement("div", null,
+                React.createElement("div", { className: "cai-modal-title" }, "Ton profil"),
+                React.createElement("div", { className: "cai-hint", style: { marginTop: 0, marginBottom: 12 } }, "Pour calculer ton objectif. Tu pourras tout ajuster plus tard."),
+                React.createElement("div", { className: "cai-row", style: { marginBottom: 10 } },
+                    React.createElement("div", null,
+                        React.createElement("label", { style: { fontSize: 12, color: "var(--muted)" } }, "Sexe"),
+                        React.createElement("select", { className: "cai-select", value: p.sex, onChange: (e) => setP({ ...p, sex: e.target.value }) },
+                            React.createElement("option", { value: "homme" }, "Homme"),
+                            React.createElement("option", { value: "femme" }, "Femme"))),
+                    React.createElement("div", null,
+                        React.createElement("label", { style: { fontSize: 12, color: "var(--muted)" } }, "\u00C2ge"),
+                        React.createElement("input", { className: "cai-input", type: "number", value: p.age, onChange: (e) => setP({ ...p, age: num(e.target.value) }) }))),
+                React.createElement("div", { className: "cai-row", style: { marginBottom: 10 } },
+                    React.createElement("div", null,
+                        React.createElement("label", { style: { fontSize: 12, color: "var(--muted)" } }, "Poids (kg)"),
+                        React.createElement("input", { className: "cai-input", type: "number", placeholder: "80", value: p.weight, onChange: (e) => setP({ ...p, weight: num(e.target.value) }) })),
+                    React.createElement("div", null,
+                        React.createElement("label", { style: { fontSize: 12, color: "var(--muted)" } }, "Taille (cm)"),
+                        React.createElement("input", { className: "cai-input", type: "number", placeholder: "178", value: p.height, onChange: (e) => setP({ ...p, height: num(e.target.value) }) }))),
+                React.createElement("div", { className: "cai-field" },
+                    React.createElement("label", null, "Activit\u00E9"),
+                    React.createElement("select", { className: "cai-select", value: p.activity, onChange: (e) => setP({ ...p, activity: Number(e.target.value) }) },
+                        React.createElement("option", { value: 1.2 }, "S\u00E9dentaire"),
+                        React.createElement("option", { value: 1.375 }, "L\u00E9g\u00E8re"),
+                        React.createElement("option", { value: 1.55 }, "Mod\u00E9r\u00E9e"),
+                        React.createElement("option", { value: 1.725 }, "Intense"),
+                        React.createElement("option", { value: 1.9 }, "Tr\u00E8s intense"))),
+                target && (React.createElement("div", { className: "cai-coach", style: { marginTop: 4 } },
+                    React.createElement("div", { className: "cai-coach-text", style: { marginTop: 0 } },
+                        "Objectif calcul\u00E9 : ",
+                        React.createElement("strong", { style: { color: "var(--txt)" } },
+                            target.toLocaleString("fr-FR"),
+                            " kcal/jour"),
+                        " \u00B7 prot\u00E9ines ",
+                        React.createElement("strong", { style: { color: "var(--txt)" } },
+                            protein,
+                            " g"),
+                        "."))),
+                React.createElement("button", { className: "cai-modal-btn", onClick: finish }, target ? "C'est parti 🚀" : "Terminer (je réglerai plus tard)"))))));
+}
 // --------------------------- Settings modal --------------------------------
-function SettingsModal({ settings, onSave, onClose }) {
+function SettingsModal({ settings, onSave, onClose, onExport, onImport, onReplay }) {
     const [s, setS] = useState(settings);
     const num = (v) => (v === "" ? "" : Number(v));
     let maintenance = null;
@@ -765,6 +1637,23 @@ function SettingsModal({ settings, onSave, onClose }) {
                     " g/kg",
                     React.createElement("br", null),
                     React.createElement("span", { style: { color: "var(--cyan)" } }, Math.round(+s.weight * f))))))) : React.createElement("div", { className: "cai-hint" }, "Renseigne ton poids ci-dessous pour calculer automatiquement (\u2248 2 g/kg en s\u00E8che).")),
+            React.createElement("div", { className: "cai-field" },
+                React.createElement("label", null, "Poids cible (kg) \u2014 optionnel"),
+                React.createElement("input", { className: "cai-input", type: "number", inputMode: "decimal", step: "0.1", value: s.goalWeight, placeholder: "ex 78", onChange: (e) => setS({ ...s, goalWeight: num(e.target.value) }) }),
+                React.createElement("div", { className: "cai-hint" }, "Sert \u00E0 estimer ta date d'objectif dans l'onglet Poids, d'apr\u00E8s ta tendance r\u00E9elle.")),
+            React.createElement("div", { className: "cai-field" },
+                React.createElement("label", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
+                    React.createElement("span", null, "Cyclage des glucides"),
+                    React.createElement("button", { onClick: () => setS({ ...s, cycleEnabled: !s.cycleEnabled }), style: { border: "none", borderRadius: 20, width: 46, height: 26, cursor: "pointer", position: "relative", background: s.cycleEnabled ? "var(--green)" : "var(--panel-2)", transition: "background .15s" } },
+                        React.createElement("span", { style: { position: "absolute", top: 3, left: s.cycleEnabled ? 23 : 3, width: 20, height: 20, borderRadius: "50%", background: "#fff", transition: "left .15s" } }))),
+                React.createElement("div", { className: "cai-hint" }, "Plus de calories les jours d'entra\u00EEnement, moins les jours de repos \u2014 m\u00EAme moyenne hebdo."),
+                s.cycleEnabled && (React.createElement("div", { className: "cai-row", style: { marginTop: 12 } },
+                    React.createElement("div", null,
+                        React.createElement("label", { style: { fontSize: 12, color: "var(--muted)", display: "block", marginBottom: 6 } }, "Jours d'entra\u00EEnement / sem"),
+                        React.createElement("select", { className: "cai-select", value: s.trainingDays, onChange: (e) => setS({ ...s, trainingDays: Number(e.target.value) }) }, [1, 2, 3, 4, 5, 6].map((n) => React.createElement("option", { key: n, value: n }, n)))),
+                    React.createElement("div", null,
+                        React.createElement("label", { style: { fontSize: 12, color: "var(--muted)", display: "block", marginBottom: 6 } }, "Bonus jour training (kcal)"),
+                        React.createElement("input", { className: "cai-input", type: "number", inputMode: "numeric", value: s.carbShift, onChange: (e) => setS({ ...s, carbShift: num(e.target.value) || 0 }) }))))),
             React.createElement("div", { className: "cai-calc" },
                 React.createElement("div", { style: { fontSize: 13, fontWeight: 600, marginBottom: 12 } }, "Calculateur (optionnel)"),
                 React.createElement("div", { className: "cai-row", style: { marginBottom: 12 } },
@@ -809,7 +1698,219 @@ function SettingsModal({ settings, onSave, onClose }) {
                 "Appliquer l'objectif calcul\u00E9 (",
                 computed.toLocaleString("fr-FR"),
                 ")"),
+            React.createElement("div", { className: "cai-field", style: { borderTop: "1px solid var(--hair)", paddingTop: 16, marginTop: 4 } },
+                React.createElement("label", null, "Sauvegarde des donn\u00E9es"),
+                React.createElement("div", { style: { display: "flex", gap: 10 } },
+                    React.createElement("button", { onClick: onExport, style: { flex: 1, background: "var(--panel-2)", color: "var(--txt)", border: "1px solid var(--hair)", borderRadius: 10, padding: 12, fontWeight: 600, fontSize: 14, cursor: "pointer", fontFamily: "Inter, sans-serif" } }, "\u2B07 Exporter"),
+                    React.createElement("label", { style: { flex: 1, background: "var(--panel-2)", color: "var(--txt)", border: "1px solid var(--hair)", borderRadius: 10, padding: 12, fontWeight: 600, fontSize: 14, cursor: "pointer", textAlign: "center", fontFamily: "Inter, sans-serif" } },
+                        "\u2B06 Importer",
+                        React.createElement("input", { type: "file", accept: "application/json,.json", onChange: (e) => { var _a; return onImport((_a = e.target.files) === null || _a === void 0 ? void 0 : _a[0]); }, style: { display: "none" } }))),
+                React.createElement("div", { className: "cai-hint" }, "Tes donn\u00E9es vivent dans ce navigateur. Exporte un fichier de temps en temps : si le cache est vid\u00E9, c'est ta seule sauvegarde.")),
+            React.createElement("button", { className: "cai-modal-btn", style: { background: "var(--panel-2)", color: "var(--txt)", marginTop: 4 }, onClick: onReplay }, "Revoir l'introduction"),
             React.createElement("button", { className: "cai-modal-btn", onClick: () => onSave(s) }, "Enregistrer"),
+            React.createElement("button", { className: "cai-modal-close", onClick: onClose }, "Annuler"))));
+}
+// --------------------------- Scanner code-barres ---------------------------
+function ScannerModal({ onAdd, onClose }) {
+    const videoRef = useRef(null);
+    const streamRef = useRef(null);
+    const stopRef = useRef(false);
+    const [status, setStatus] = useState("init"); // init | scanning | loading | found | notfound | error | manual
+    const [product, setProduct] = useState(null);
+    const [grams, setGrams] = useState(100);
+    const [manualCode, setManualCode] = useState("");
+    const [msg, setMsg] = useState("");
+    const supported = typeof window !== "undefined" && "BarcodeDetector" in window;
+    useEffect(() => {
+        let detector;
+        (async () => {
+            if (!supported) {
+                setStatus("manual");
+                setMsg("Le scan automatique n'est pas disponible sur ce navigateur. Saisis le code-barres à la main ci-dessous.");
+                return;
+            }
+            try {
+                detector = new window.BarcodeDetector({ formats: ["ean_13", "ean_8", "upc_a", "upc_e"] });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                streamRef.current = stream;
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    await videoRef.current.play();
+                }
+                setStatus("scanning");
+                loop(detector);
+            }
+            catch (_a) {
+                setStatus("error");
+                setMsg("Caméra inaccessible. Vérifie l'autorisation, ou saisis le code à la main.");
+            }
+        })();
+        return () => { stopRef.current = true; if (streamRef.current)
+            streamRef.current.getTracks().forEach((t) => t.stop()); };
+        // eslint-disable-next-line
+    }, []);
+    async function loop(detector) {
+        if (stopRef.current || !videoRef.current)
+            return;
+        try {
+            const codes = await detector.detect(videoRef.current);
+            if (codes && codes.length) {
+                lookup(codes[0].rawValue);
+                return;
+            }
+        }
+        catch (_) { }
+        setTimeout(() => loop(detector), 350);
+    }
+    async function lookup(code) {
+        stopRef.current = true;
+        if (streamRef.current)
+            streamRef.current.getTracks().forEach((t) => t.stop());
+        setStatus("loading");
+        setMsg("");
+        try {
+            const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json`);
+            if (!res.ok)
+                throw new Error("HTTP " + res.status);
+            const data = await res.json();
+            const p = data.product;
+            if ((data.status === 1 || data.status === "success") && p) {
+                const n = p.nutriments || {};
+                let kcal = n["energy-kcal_100g"];
+                if (kcal == null && n["energy_100g"])
+                    kcal = n["energy_100g"] / 4.184;
+                setProduct({
+                    code, name: p.product_name_fr || p.product_name || `Produit ${code}`,
+                    brand: p.brands || "",
+                    per100: { kcal: Math.round(kcal || 0), p: Math.round(n.proteins_100g || 0), c: Math.round(n.carbohydrates_100g || 0), f: Math.round(n.fat_100g || 0) },
+                });
+                setStatus("found");
+            }
+            else {
+                setStatus("notfound");
+                setMsg(`Code ${code} introuvable dans Open Food Facts.`);
+            }
+        }
+        catch (_a) {
+            setStatus("error");
+            setMsg("Erreur réseau lors de la recherche du produit.");
+        }
+    }
+    function add() {
+        const f = Math.max(0, Number(grams) || 0) / 100;
+        const item = {
+            name: product.name, quantity: `${grams} g`,
+            calories: Math.round(product.per100.kcal * f), protein: Math.round(product.per100.p * f),
+            carbs: Math.round(product.per100.c * f), fat: Math.round(product.per100.f * f),
+        };
+        onAdd({ id: Date.now(), photo: null, items: [item], confidence: "high",
+            calories: item.calories, protein: item.protein, carbs: item.carbs, fat: item.fat, name: item.name });
+    }
+    return (React.createElement("div", { className: "cai-overlay", onClick: onClose },
+        React.createElement("div", { className: "cai-modal", onClick: (e) => e.stopPropagation() },
+            React.createElement("div", { className: "cai-modal-title" }, "Scanner un code-barres"),
+            (status === "scanning" || status === "init") && (React.createElement(React.Fragment, null,
+                React.createElement("div", { className: "cai-scanbox" },
+                    React.createElement("video", { ref: videoRef, playsInline: true, muted: true, style: { width: "100%", display: "block" } }),
+                    React.createElement("div", { className: "cai-scanline" })),
+                React.createElement("div", { className: "cai-hint", style: { textAlign: "center" } }, "Vise le code-barres du produit\u2026"))),
+            status === "loading" && React.createElement("div", { className: "cai-analyzing", style: { justifyContent: "center", padding: "20px 0" } },
+                React.createElement("span", { className: "cai-spin" }),
+                " Recherche du produit\u2026"),
+            status === "found" && product && (React.createElement(React.Fragment, null,
+                React.createElement("div", { style: { fontWeight: 600, fontSize: 16 } }, product.name),
+                product.brand && React.createElement("div", { style: { color: "var(--muted)", fontSize: 13, marginBottom: 4 } }, product.brand),
+                React.createElement("div", { style: { fontFamily: "JetBrains Mono, monospace", fontSize: 12, color: "var(--muted)", marginBottom: 12 } },
+                    "Pour 100 g : ",
+                    product.per100.kcal,
+                    " kcal \u00B7 P ",
+                    product.per100.p,
+                    " \u00B7 G ",
+                    product.per100.c,
+                    " \u00B7 L ",
+                    product.per100.f),
+                React.createElement("div", { className: "cai-field" },
+                    React.createElement("label", null, "Quantit\u00E9 consomm\u00E9e (g)"),
+                    React.createElement("input", { className: "cai-input", type: "number", inputMode: "numeric", value: grams, onChange: (e) => setGrams(e.target.value) })),
+                React.createElement("div", { className: "cai-coach", style: { marginTop: 0, marginBottom: 4 } },
+                    React.createElement("div", { className: "cai-coach-text", style: { marginTop: 0 } },
+                        "Soit ",
+                        React.createElement("strong", { style: { color: "var(--txt)" } },
+                            Math.round(product.per100.kcal * (Number(grams) || 0) / 100),
+                            " kcal"),
+                        " \u00B7 ",
+                        Math.round(product.per100.p * (Number(grams) || 0) / 100),
+                        " g de prot\u00E9ines")),
+                React.createElement("button", { className: "cai-modal-btn", onClick: add }, "Ajouter au journal"))),
+            (status === "notfound" || status === "error" || status === "manual") && (React.createElement(React.Fragment, null,
+                msg && React.createElement("div", { className: status === "manual" ? "cai-hint" : "cai-err", style: { marginTop: 0, marginBottom: 12 } }, msg),
+                React.createElement("div", { className: "cai-field" },
+                    React.createElement("label", null, "Saisir le code-barres \u00E0 la main"),
+                    React.createElement("div", { style: { display: "flex", gap: 8 } },
+                        React.createElement("input", { className: "cai-input", type: "number", inputMode: "numeric", value: manualCode, placeholder: "ex 3017620422003", onChange: (e) => setManualCode(e.target.value), style: { flex: 1 } }),
+                        React.createElement("button", { className: "cai-modal-btn", style: { width: "auto", marginTop: 0, padding: "12px 16px" }, onClick: () => manualCode && lookup(manualCode.trim()) }, "Chercher"))),
+                React.createElement("div", { className: "cai-hint" }, "Si le produit n'est pas dans Open Food Facts, utilise \u00AB Manuel \u00BB pour saisir les valeurs."))),
+            React.createElement("button", { className: "cai-modal-close", onClick: onClose }, "Fermer"))));
+}
+// --------------------------- Describe (voix / texte) -----------------------
+function DescribeModal({ onSubmit, onClose }) {
+    const [text, setText] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState("");
+    const [listening, setListening] = useState(false);
+    const recRef = useRef(null);
+    const SR = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
+    function toggleMic() {
+        if (!SR) {
+            setErr("La dictée vocale n'est pas disponible sur ce navigateur. Tu peux taper ton repas.");
+            return;
+        }
+        if (listening) {
+            recRef.current && recRef.current.stop();
+            return;
+        }
+        const rec = new SR();
+        rec.lang = "fr-FR";
+        rec.continuous = true;
+        rec.interimResults = false;
+        rec.onresult = (e) => {
+            let add = "";
+            for (let i = e.resultIndex; i < e.results.length; i++)
+                add += e.results[i][0].transcript;
+            setText((t) => (t ? t + " " : "") + add.trim());
+        };
+        rec.onend = () => setListening(false);
+        rec.onerror = () => setListening(false);
+        recRef.current = rec;
+        setErr("");
+        setListening(true);
+        rec.start();
+    }
+    async function submit() {
+        setErr("");
+        setLoading(true);
+        if (recRef.current && listening)
+            recRef.current.stop();
+        const r = await onSubmit(text);
+        setLoading(false);
+        if (r && r.ok)
+            onClose();
+        else
+            setErr((r && r.error) || "Erreur.");
+    }
+    return (React.createElement("div", { className: "cai-overlay", onClick: onClose },
+        React.createElement("div", { className: "cai-modal", onClick: (e) => e.stopPropagation() },
+            React.createElement("div", { className: "cai-modal-title" }, "D\u00E9crire un repas"),
+            React.createElement("div", { className: "cai-hint", style: { marginTop: 0, marginBottom: 10 } }, "Dicte ou \u00E9cris ce que tu as mang\u00E9, l'IA estime calories et macros. Ex : \u00AB 200 g de poulet, du riz, une pomme \u00BB."),
+            React.createElement("div", { style: { position: "relative" } },
+                React.createElement("textarea", { className: "cai-input", rows: 4, value: text, onChange: (e) => setText(e.target.value), placeholder: "Ton repas\u2026", style: { resize: "none", paddingRight: 50 } }),
+                React.createElement("button", { onClick: toggleMic, "aria-label": "Dicter", style: {
+                        position: "absolute", right: 8, top: 8, width: 38, height: 38, borderRadius: "50%", border: "none", cursor: "pointer",
+                        background: listening ? "var(--red)" : "var(--panel-2)", color: listening ? "#fff" : "var(--cyan)", fontSize: 17
+                    } }, listening ? "■" : "🎤")),
+            listening && React.createElement("div", { style: { color: "var(--cyan)", fontSize: 12, marginTop: 8 } }, "\uD83D\uDD34 \u00C9coute en cours\u2026 parle, puis appuie sur \u25A0."),
+            err && React.createElement("div", { className: "cai-err", style: { marginTop: 10 } }, err),
+            React.createElement("button", { className: "cai-modal-btn", onClick: submit, disabled: loading || !text.trim(), style: { opacity: loading || !text.trim() ? 0.5 : 1 } }, loading ? "Analyse en cours…" : "Analyser et ajouter"),
             React.createElement("button", { className: "cai-modal-close", onClick: onClose }, "Annuler"))));
 }
 // --------------------------- Manual entry modal ----------------------------
@@ -819,7 +1920,8 @@ function ManualModal({ onAdd, onClose }) {
     function submit() {
         if (!valid)
             return;
-        const item = { name: f.name, quantity: f.quantity, calories: Math.round(+f.calories || 0), protein: Math.round(+f.protein || 0), carbs: Math.round(+f.carbs || 0), fat: Math.round(+f.fat || 0) };
+        const cl = (v) => Math.max(0, Math.round(+v || 0));
+        const item = { name: f.name.trim(), quantity: f.quantity, calories: cl(f.calories), protein: cl(f.protein), carbs: cl(f.carbs), fat: cl(f.fat) };
         onAdd({ id: Date.now(), photo: null, items: [item], confidence: null, ...item, name: f.name });
     }
     return (React.createElement("div", { className: "cai-overlay", onClick: onClose },
